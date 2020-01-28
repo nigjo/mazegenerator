@@ -7,7 +7,8 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="MazeGenerator" default="default" basedir="." xmlns:j2semodularproject="http://www.netbeans.org/ns/j2se-modular-project/1">
+<project name="MazeGenerator" default="default" basedir="." xmlns:j2semodularproject="http://www.netbeans.org/ns/j2se-modular-project/1"
+  xmlns:if="ant:if">
     <description>Builds, tests, and runs the project MazeGenerator.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
@@ -63,6 +64,8 @@
 
     -->
     <target name="-post-deploy">
-      <copy todir="${dist.jlink.output}" file="MazeGenerator.cmd"/>
+      <available file="${dist.jlink.output}" property="dist.jlink.output.exist"/>
+      <copy todir="${dist.jlink.output}" file="MazeGenerator.cmd"
+        if:set="dist.jlink.output.exist"/>
     </target>
 </project>

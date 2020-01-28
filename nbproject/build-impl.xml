@@ -1240,19 +1240,10 @@ is divided into following sections:
             </mappedresources>
         </resources>
         <property location="${run.modules.dir}" name="run.modules.dir.location"/>
-        <echo>run.modules.dir=${run.modules.dir}</echo>
-        <echo>run.modules.dir.location=${run.modules.dir.location}</echo>
-        <echo>toString:main.class.relativepath=${toString:main.class.relativepath}</echo>
-        <echo>----</echo>
-        <pathconvert >
-            <fileset dir="${run.modules.dir}" includes="**/${toString:main.class.relativepath}"/>
-        </pathconvert>
-        <echo>----</echo>
         <pathconvert property="module.name">
             <fileset dir="${run.modules.dir}" includes="**/${toString:main.class.relativepath}"/>
             <regexpmapper from="\Q${run.modules.dir.location}${file.separator}\E([^${file.separator.string}]+)\Q${file.separator}\E.*\.class" to="\1"/>
         </pathconvert>
-        <echo>module.name=${module.name}</echo>
     </target>
     <target depends="-main-module-set" name="-main-module-check">
         <fail message="Could not determine module of the main class and module.name is not set">

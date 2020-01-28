@@ -17,10 +17,10 @@ package de.nigjo.maze;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import de.nigjo.maze.core.Maze;
-import de.nigjo.maze.generator.RandomizedKruskal;
-import de.nigjo.maze.generator.SimpleMaze;
+import de.nigjo.maze.core.MazeGenerator;
 
 /**
  * Eine neue Klasse von Jens Hofschröer. Erstellt Jan 28, 2020, 8:52:23 AM.
@@ -62,16 +62,19 @@ public class Generator
     parameters.put("height", height);
 
     System.out.println("used seed is " + seed);
-    // Maze generated1 = SimpleMaze.generate("Hallo Welt", 10, 10);
-    // Maze generated2 = KruskalMaze.generate("Hallo Welt".hashCode(), 10, 10);
-    Maze generated1 = SimpleMaze.generate(seed, width, height);
-    Maze generated2 = new RandomizedKruskal().generateMaze(seed, parameters);
-    
-    Solver.solve(generated1);
-    Solver.solve(generated2);
 
-    printSingle(generated1);
-    printSingle(generated2);
+    ServiceLoader<MazeGenerator> generators = ServiceLoader.load(MazeGenerator.class);
+
+    long randomStart = seed;
+    for(MazeGenerator generator : generators)
+    {
+      Maze maze = generator.generateMaze(randomStart, parameters);
+      if(maze != null)
+      {
+        Solver.solve(maze);
+        printSingle(maze);
+      }
+    }
   }
 
   private static void solveAndPrint(Maze m1, Maze m2)

@@ -15,5 +15,5 @@
  */
 module de.nigjo.maze {
   requires de.nigjo.maze.core;
-  requires de.nigjo.maze.generator;
+  uses de.nigjo.maze.core.MazeGenerator;
 }

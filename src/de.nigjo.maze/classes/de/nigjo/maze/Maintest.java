@@ -18,9 +18,6 @@ package de.nigjo.maze;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.nigjo.maze.core.Maze;
-import de.nigjo.maze.generator.RandomizedKruskal;
-import de.nigjo.maze.generator.SimpleMaze;
 
 /**
  *
@@ -35,20 +32,21 @@ public class Maintest
     parameters.put("height", 10);
     long seed = "Hallo-Welt".hashCode();
 
-    Maze generated1 = SimpleMaze.generate("Hallo Welt", 10, 10);
-    Maze generated2 = new RandomizedKruskal().generateMaze(seed, parameters);
+//    Maze generated1 = SimpleMaze.generate(seed, 10, 10);
+//    Maze generated2 = new RandomizedKruskal().generateMaze(seed, parameters);
 
-    printMerged(
-        QuadraticMazePainter.toString(generated1),
-        QuadraticMazePainter.toString(generated2));
-    int count;
-    count = Solver.solve(generated1);
-    System.out.print(count + " ");
-    count = Solver.solve(generated2);
-    System.out.println(count);
-    printMerged(
-        QuadraticMazePainter.toString(generated1),
-        QuadraticMazePainter.toString(generated2));
+//    printMerged(
+//        QuadraticMazePainter.toString(generated1),
+//        QuadraticMazePainter.toString(generated2));
+//    int count;
+//    count = Solver.solve(generated1);
+//    System.out.print(count + " ");
+//    count = Solver.solve(generated2);
+//    System.out.println(count);
+//    printMerged(
+//        QuadraticMazePainter.toString(generated1),
+//        QuadraticMazePainter.toString(generated2));
+//    System.out.println(QuadraticMazePainter.toString(generated1));
   }
 
   private static void printMerged(String s1, String s2)

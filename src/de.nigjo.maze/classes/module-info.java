@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 module de.nigjo.maze {
   requires de.nigjo.maze.core;
-  requires de.nigjo.maze.generator;      
+  requires de.nigjo.maze.generator;
 }

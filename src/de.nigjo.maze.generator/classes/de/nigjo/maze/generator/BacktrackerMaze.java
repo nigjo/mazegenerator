@@ -16,65 +16,46 @@
 package de.nigjo.maze.generator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
+import de.nigjo.maze.core.MazeGenerator;
 
 /**
  *
  * @author nigjo
  */
-public class SimpleMaze extends Maze
+public class BacktrackerMaze implements MazeGenerator
 {
-  public SimpleMaze()
-  {
-  }
-
   @Override
-  public String getName()
+  public Maze generateMaze(long seed, Map<String, Object> parameters)
   {
-    return "Backtracker";
+    int width = (Integer)parameters.get("width");
+    int height = (Integer)parameters.get("height");
+
+    return generateMaze(seed, width, height);
   }
 
-  public static Maze generate(String namedMaze)
+  public Maze generateMaze(long rndSeed, int width, int height)
   {
-    return generate(namedMaze.hashCode());
-  }
-
-  public static Maze generate(String namedMaze, int width, int height)
-  {
-    return generate(namedMaze.hashCode(), width, height);
-  }
-
-  public static Maze generate(long rndSeed)
-  {
-    return generate(rndSeed, 20, 10);
-  }
-
-  public static Maze generate(long rndSeed, int width, int height)
-  {
-    SimpleMaze simple = new SimpleMaze();
-    //long rndSeed = "EinTestgarten".hashCode();
-
-    Cell cells[] = QuadraticMaze.createQuadratic(width, height);
+    QuadraticMaze simple = new QuadraticMaze(width, height);
+    simple.setName("Backtracker");
 
     Random rnd = new Random(rndSeed);
 
     int start = rnd.nextInt(width / 2) + (width / 4);
-//    int end = rnd.nextInt(width);
     int end = rnd.nextInt(width / 2) + (width / 4);
 
-    Cell entrance = cells[start];
-    simple.setWidth(width);
-    simple.setHeight(height);
-    simple.setCells(Arrays.asList(cells));
+    List<Cell> cells = simple.getCells();
+
+    Cell entrance = cells.get(start);
     simple.setEntance(entrance);
-    simple.setExit(cells[cells.length - end - 1]);
+    simple.setExit(cells.get(cells.size() - end - 1));
 
 //    System.out.println(simple);
     Set<Cell> visited = new HashSet<>();

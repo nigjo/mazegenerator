@@ -18,5 +18,7 @@ module de.nigjo.maze.generator
 {
   exports de.nigjo.maze.generator;
   requires de.nigjo.maze.core;
-  provides de.nigjo.maze.core.MazeGenerator with de.nigjo.maze.generator.RandomizedKruskal;
+  provides de.nigjo.maze.core.MazeGenerator with
+      de.nigjo.maze.generator.BacktrackerMaze,
+      de.nigjo.maze.generator.RandomizedKruskal;
 }

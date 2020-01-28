@@ -65,7 +65,16 @@
     -->
     <target name="-post-deploy">
       <available file="${dist.jlink.output}" property="dist.jlink.output.exist"/>
-      <copy todir="${dist.jlink.output}" file="MazeGenerator.cmd"
-        if:set="dist.jlink.output.exist"/>
+      <copy todir="${dist.jlink.output}" if:set="dist.jlink.output.exist">
+        <fileset dir="${basedir}">
+          <include name="MazeGenerator.cmd"/>
+          <include name="LICENSE"/>
+          <include name="READEME.md"/>
+        </fileset>
+      </copy>
+      <zip destfile="${dist.dir}/${application.title}.zip" compress="true"
+        update="true" if:set="dist.jlink.output.exist">
+        <fileset dir="${dist.jlink.output}" includes="**"/>
+      </zip>
     </target>
 </project>

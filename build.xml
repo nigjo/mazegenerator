@@ -8,73 +8,99 @@
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
 <project name="MazeGenerator" default="default" basedir="." xmlns:j2semodularproject="http://www.netbeans.org/ns/j2se-modular-project/1"
-  xmlns:if="ant:if">
-    <description>Builds, tests, and runs the project MazeGenerator.</description>
-    <import file="nbproject/build-impl.xml"/>
-    <!--
+         xmlns:if="ant:if" xmlns:unless="ant:unless">
+  <description>Builds, tests, and runs the project MazeGenerator.</description>
+  <import file="nbproject/build-impl.xml"/>
+  <!--
 
-    There exist several targets which are by default empty and which can be 
-    used for execution of your tasks. These targets are usually executed 
-    before and after some main targets. They are: 
+  There exist several targets which are by default empty and which can be
+  used for execution of your tasks. These targets are usually executed
+  before and after some main targets. They are:
 
-      -pre-init:                 called before initialization of project properties
-      -post-init:                called after initialization of project properties
-      -pre-compile:              called before javac compilation
-      -post-compile:             called after javac compilation
-      -pre-compile-single:       called before javac compilation of single file
-      -post-compile-single:      called after javac compilation of single file
-      -pre-compile-test:         called before javac compilation of JUnit tests
-      -post-compile-test:        called after javac compilation of JUnit tests
-      -pre-compile-test-single:  called before javac compilation of single JUnit test
-      -post-compile-test-single: called after javac compilation of single JUunit test
-      -pre-jar:                  called before JAR building
-      -post-jar:                 called after JAR building
-      -post-clean:               called after cleaning build products
+    -pre-init:                 called before initialization of project properties
+    -post-init:                called after initialization of project properties
+    -pre-compile:              called before javac compilation
+    -post-compile:             called after javac compilation
+    -pre-compile-single:       called before javac compilation of single file
+    -post-compile-single:      called after javac compilation of single file
+    -pre-compile-test:         called before javac compilation of JUnit tests
+    -post-compile-test:        called after javac compilation of JUnit tests
+    -pre-compile-test-single:  called before javac compilation of single JUnit test
+    -post-compile-test-single: called after javac compilation of single JUunit test
+    -pre-jar:                  called before JAR building
+    -post-jar:                 called after JAR building
+    -post-clean:               called after cleaning build products
 
-    (Targets beginning with '-' are not intended to be called on their own.)
+  (Targets beginning with '-' are not intended to be called on their own.)
 
-    Example of inserting an obfuscator after compilation could look like this:
+  Example of inserting an obfuscator after compilation could look like this:
 
-        <target name="-post-compile">
-            <obfuscate>
-                <fileset dir="${build.classes.dir}"/>
-            </obfuscate>
-        </target>
+      <target name="-post-compile">
+          <obfuscate>
+              <fileset dir="${build.classes.dir}"/>
+          </obfuscate>
+      </target>
 
-    For list of available properties check the imported 
-    nbproject/build-impl.xml file. 
+  For list of available properties check the imported
+  nbproject/build-impl.xml file.
 
 
-    Another way to customize the build is by overriding existing main targets.
-    The targets of interest are: 
+  Another way to customize the build is by overriding existing main targets.
+  The targets of interest are:
 
-      -init-macrodef-javac:     defines macro for javac compilation
-      -init-macrodef-junit:     defines macro for junit execution
-      -init-macrodef-debug:     defines macro for class debugging
-      -init-macrodef-java:      defines macro for class execution
-      -do-jar:                  JAR building
-      run:                      execution of project 
-      -javadoc-build:           Javadoc generation
-      test-report:              JUnit report generation
+    -init-macrodef-javac:     defines macro for javac compilation
+    -init-macrodef-junit:     defines macro for junit execution
+    -init-macrodef-debug:     defines macro for class debugging
+    -init-macrodef-java:      defines macro for class execution
+    -do-jar:                  JAR building
+    run:                      execution of project
+    -javadoc-build:           Javadoc generation
+    test-report:              JUnit report generation
 
-    Notice that the overridden target depends on the jar target and not only on 
-    the compile target as the regular run target does. Again, for a list of available 
-    properties which you can use, check the target you are overriding in the
-    nbproject/build-impl.xml file. 
+  Notice that the overridden target depends on the jar target and not only on
+  the compile target as the regular run target does. Again, for a list of available
+  properties which you can use, check the target you are overriding in the
+  nbproject/build-impl.xml file.
 
-    -->
-    <target name="-post-deploy">
-      <available file="${dist.jlink.output}" property="dist.jlink.output.exist"/>
-      <copy todir="${dist.jlink.output}" if:set="dist.jlink.output.exist">
-        <fileset dir="${basedir}">
-          <include name="MazeGenerator.cmd"/>
-          <include name="LICENSE"/>
-          <include name="READEME.md"/>
-        </fileset>
-      </copy>
-      <zip destfile="${dist.dir}/${application.title}.zip" compress="true"
-        update="true" if:set="dist.jlink.output.exist">
-        <fileset dir="${dist.jlink.output}" includes="**"/>
-      </zip>
-    </target>
+  -->
+  <target name="release" description="create a release zip">
+    <property name="do.jar" value="true"/>
+    <property name="do.jlink" value="true"/>
+    <antcall target="deploy"/>
+  </target>
+  <target name="-pre-jar">
+    <exec executable="git" dir="${basedir}" outputproperty="git.hash"
+          failifexecutionfails="false" unless:set="git.hash">
+      <arg value="rev-parse"/>
+      <arg value="HEAD"/>
+    </exec>
+    <property name="git.hash" value="0"/>
+    <echo level="info">git.hash=${git.hash}</echo>
+    <!-- disable "usage"-message in default output -->
+    <property name="jar.usage.level" value="verbose"/>
+  </target>
+  <target name="-make-single-jar" depends="MazeGenerator-impl.-make-single-jar,-post-single-jar"/>
+  <target name="-post-single-jar">
+    <!-- fallback if no git is here -->
+    <jar destfile="${dist.dir}/${module.jar.filename}" update="true" manifestencoding="UTF-8">
+      <manifest>
+        <attribute name="Git-Hash" value="${git.hash}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="-post-deploy">
+    <available file="${dist.jlink.output}" property="dist.jlink.output.exist"/>
+    <copy todir="${dist.jlink.output}" if:set="dist.jlink.output.exist">
+      <fileset dir="${basedir}">
+        <include name="MazeGenerator.cmd"/>
+        <include name="LICENSE"/>
+        <include name="READEME.md"/>
+      </fileset>
+    </copy>
+    <zip destfile="${dist.dir}/${application.title}.zip" compress="true"
+         update="true" if:set="dist.jlink.output.exist">
+      <fileset dir="${dist.jlink.output}" includes="**"/>
+    </zip>
+  </target>
 </project>

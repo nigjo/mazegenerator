@@ -21,6 +21,7 @@ import java.util.ServiceLoader;
 
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
+import de.nigjo.maze.core.QuadraticMazePainter;
 
 /**
  * Eine neue Klasse von Jens Hofschröer. Erstellt Jan 28, 2020, 8:52:23 AM.

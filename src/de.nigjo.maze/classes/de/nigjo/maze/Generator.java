@@ -15,10 +15,9 @@
  */
 package de.nigjo.maze;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ServiceLoader;
 
+import de.nigjo.maze.core.Config;
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
 import de.nigjo.maze.core.QuadraticMazePainter;
@@ -34,42 +33,17 @@ public class Generator
 {
   public static void main(String[] args)
   {
-    int width = 10;
-    int height = 10;
-    long seed = System.currentTimeMillis();
-    if(args.length > 0)
-    {
-      width = Integer.parseInt(args[0]);
-    }
-    if(args.length > 1)
-    {
-      height = Integer.parseInt(args[1]);
-    }
-    if(args.length > 2 && !args[2].isBlank())
-    {
-      try
-      {
-        seed = Long.parseLong(args[2]);
-      }
-      catch(NumberFormatException ex)
-      {
-        System.out.println("getting seed from \"" + args[2] + "\"");
-        seed = args[2].hashCode();
-      }
-    }
+    Config cfg = new Config();
+    cfg.parseCommandline(args);
 
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("width", width);
-    parameters.put("height", height);
-
-    System.out.println("used seed is " + seed);
+    System.out.println("used seed is " + cfg.getSeed());
 
     ServiceLoader<MazeGenerator> generators = ServiceLoader.load(MazeGenerator.class);
 
-    long randomStart = seed;
+    long randomStart = cfg.getSeed();
     for(MazeGenerator generator : generators)
     {
-      Maze maze = generator.generateMaze(randomStart, parameters);
+      Maze maze = generator.generateMaze(randomStart, cfg.getParameters());
       if(maze != null)
       {
         Solver.solve(maze);

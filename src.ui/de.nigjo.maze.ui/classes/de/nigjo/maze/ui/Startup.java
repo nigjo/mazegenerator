@@ -15,15 +15,14 @@
  */
 package de.nigjo.maze.ui;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.ServiceLoader;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import de.nigjo.maze.core.Config;
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
 
@@ -35,6 +34,9 @@ public class Startup
 {
   public static void main(String[] args)
   {
+    Config cfg = new Config();
+    cfg.parseCommandline(args);
+
     ServiceLoader<MazeGenerator> generators = ServiceLoader.load(MazeGenerator.class);
     MazeGenerator generator = null;
     Iterator<MazeGenerator> iterator = generators.iterator();
@@ -42,17 +44,15 @@ public class Startup
       generator = iterator.next();
     if(generator != null)
     {
-      initMaze(generator);
+      SwingUtilities.invokeLater(Startup::initUI);
+
+      initMaze(cfg, generator);
     }
   }
 
-  private static void initMaze(MazeGenerator generator)
+  private static void initMaze(Config cfg, MazeGenerator generator)
   {
-    SwingUtilities.invokeLater(Startup::initUI);
-    Map<String, Object> data = new HashMap<>();
-    data.put("width", 10);
-    data.put("height", 10);
-    Maze maze = generator.generateMaze("Hallo Welt".hashCode(), data);
+    Maze maze = generator.generateMaze(cfg.getSeed(), cfg.getParameters());
 
     SwingUtilities.invokeLater(() -> FrameBuilder.setMaze(maze));
   }

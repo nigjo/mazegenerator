@@ -134,11 +134,19 @@ is divided into following sections:
         <dirset dir="${basedir}/${src.dir}" id="have.sources.src.dir.set" includes="*/*">
             <filename regex="${have.sources.src.dir.regexp}"/>
         </dirset>
+        <j2semodularproject1:modsource_regexp xmlns:j2semodularproject1="http://www.netbeans.org/ns/j2se-modular-project/1" modsource="${src.src.ui.dir.path}" property="have.sources.src.src.ui.dir.regexp"/>
+        <dirset dir="${basedir}/${src.src.ui.dir}" id="have.sources.src.src.ui.dir.set" includes="*/*">
+            <filename regex="${have.sources.src.src.ui.dir.regexp}"/>
+        </dirset>
         <union id="have.sources.set">
             <dirset refid="have.sources.src.dir.set"/>
+            <dirset refid="have.sources.src.src.ui.dir.set"/>
         </union>
         <condition property="have.sources">
             <or>
+                <resourcecount count="0" when="greater">
+                    <union refid="have.sources.set"/>
+                </resourcecount>
                 <resourcecount count="0" when="greater">
                     <union refid="have.sources.set"/>
                 </resourcecount>
@@ -285,6 +293,7 @@ is divided into following sections:
     </target>
     <target depends="-pre-init,-init-private,-init-user,-init-project,-do-init" name="-init-check">
         <fail unless="src.dir">Must set src.dir</fail>
+        <fail unless="src.src.ui.dir">Must set src.src.ui.dir</fail>
         <fail unless="test.src.dir">Must set test.src.dir</fail>
         <fail unless="build.dir">Must set build.dir</fail>
         <fail unless="dist.dir">Must set dist.dir</fail>
@@ -315,7 +324,7 @@ is divided into following sections:
             <attribute default="${build.modules.dir}" name="destdir"/>
             <attribute default="${javac.classpath}" name="classpath"/>
             <attribute default="${javac.modulepath}" name="modulepath"/>
-            <attribute default="${src.dir}/*/${src.dir.path}" name="modulesourcepath"/>
+            <attribute default="${src.dir}/*/${src.dir.path}:${src.src.ui.dir}/*/${src.src.ui.dir.path}" name="modulesourcepath"/>
             <attribute default="${javac.upgrademodulepath}" name="upgrademodulepath"/>
             <attribute default="${javac.processorpath}" name="processorpath"/>
             <attribute default="${javac.processormodulepath}" name="processormodulepath"/>
@@ -368,7 +377,7 @@ is divided into following sections:
     </target>
     <target depends="-init-macrodef-javac" name="-init-macrodef-javac-depend">
         <macrodef name="depend" uri="http://www.netbeans.org/ns/j2se-modular-project/1">
-            <attribute default="${src.dir}" name="srcdir"/>
+            <attribute default="${src.dir}:${src.src.ui.dir}" name="srcdir"/>
             <attribute default="${build.classes.dir}" name="destdir"/>
             <attribute default="${javac.classpath}" name="classpath"/>
             <sequential>
@@ -1015,7 +1024,7 @@ is divided into following sections:
                 <include name="*"/>
             </dirset>
         </pathconvert>
-        <j2semodularproject1:depend xmlns:j2semodularproject1="http://www.netbeans.org/ns/j2se-modular-project/1" srcdir="${src.dir}:${build.generated.subdirs}"/>
+        <j2semodularproject1:depend xmlns:j2semodularproject1="http://www.netbeans.org/ns/j2se-modular-project/1" srcdir="${src.dir}:${src.src.ui.dir}:${build.generated.subdirs}"/>
     </target>
     <target depends="init,deps-jar,-pre-pre-compile,-pre-compile,-compile-depend" if="have.sources" name="-do-compile">
         <j2semodularproject1:javac xmlns:j2semodularproject1="http://www.netbeans.org/ns/j2se-modular-project/1" gensrcdir="${build.generated.sources.dir}"/>
@@ -1024,6 +1033,12 @@ is divided into following sections:
         <copy todir="${build.modules.dir}">
             <fileset dir="${src.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
             <regexpmapper from="${src.dir.path.regexp}" to="\1/\3"/>
+        </copy>
+        <j2semodularproject1:modsource_regexp xmlns:j2semodularproject1="http://www.netbeans.org/ns/j2se-modular-project/1" filePattern="(.*$)" modsource="${src.src.ui.dir.path}" property="src.src.ui.dir.path.regexp"/>
+        <echo message="Copying resources from ${src.src.ui.dir}"/>
+        <copy todir="${build.modules.dir}">
+            <fileset dir="${src.src.ui.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <regexpmapper from="${src.src.ui.dir.path.regexp}" to="\1/\3"/>
         </copy>
     </target>
     <target if="has.persistence.xml" name="-copy-persistence-xml">
@@ -1449,6 +1464,9 @@ is divided into following sections:
             <fileset dir="${src.dir}" excludes="${bug5101868workaround},${excludes}" includes="${includes}">
                 <filename name="**/*.java"/>
             </fileset>
+            <fileset dir="${src.src.ui.dir}" excludes="${bug5101868workaround},${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
             <fileset dir="${build.generated.sources.dir}" erroronmissingdir="false">
                 <include name="**/*.java"/>
                 <exclude name="*.java"/>
@@ -1458,6 +1476,9 @@ is divided into following sections:
         </javadoc>
         <copy todir="${dist.javadoc.dir}">
             <fileset dir="${src.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${src.src.ui.dir}" excludes="${excludes}" includes="${includes}">
                 <filename name="**/doc-files/**"/>
             </fileset>
             <fileset dir="${build.generated.sources.dir}" erroronmissingdir="false">

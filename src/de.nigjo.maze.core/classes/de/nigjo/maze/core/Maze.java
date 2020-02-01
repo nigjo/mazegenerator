@@ -16,6 +16,7 @@
 package de.nigjo.maze.core;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -102,4 +103,27 @@ public abstract class Maze
     return name;
   }
 
+  public int getCellId(Cell c)
+  {
+    if(cells != null && cells.contains(c))
+    {
+      if(cells instanceof List)
+      {
+        return ((List)cells).indexOf(c);
+      }
+      else
+      {
+        int index = 0;
+        for(Cell cell : cells)
+        {
+          if(cell == c)
+          {
+            return index;
+          }
+          ++index;
+        }
+      }
+    }
+    return -1;
+  }
 }

@@ -86,7 +86,7 @@ public class MazePanel extends JPanel
       current.setMark(QuadraticMazePainter.MARK_WALKED);
       current = current.getSiblings().get(direction);
       current.setMark(QuadraticMazePainter.MARK_CURRENT);
-      System.out.println(QuadraticMazePainter.toString(maze));
+      //System.out.println(QuadraticMazePainter.toString(maze));
       repaint();
     }
   }
@@ -107,8 +107,8 @@ public class MazePanel extends JPanel
   {
     double percent = pos / (double)max;
     int red = from.getRed() + (int)((to.getRed() - from.getRed()) * percent);
-    int green = from.getGreen()+ (int)((to.getGreen() - from.getGreen()) * percent);
-    int blue = from.getBlue()+ (int)((to.getBlue() - from.getBlue()) * percent);
+    int green = from.getGreen() + (int)((to.getGreen() - from.getGreen()) * percent);
+    int blue = from.getBlue() + (int)((to.getBlue() - from.getBlue()) * percent);
     return new Color(red, green, blue);
   }
 
@@ -204,6 +204,14 @@ public class MazePanel extends JPanel
       //Boden
       g.setColor(getColor(Color.BLUE, Color.CYAN.darker(), cRow, maze.getWidth()));
       g.fillRect(outer[3].x, inner[3].y, outerWidth, wallwidth);
+      if(cell.getMark() == 1)
+      {
+        g.setColor(g.getColor().darker());
+        int dotW = (inner[2].x - inner[3].x) / 2;
+        int dotH = (outer[3].y - inner[3].y) / 2;
+        g.fillOval(inner[3].x + (dotW / 2), inner[3].y + (dotH / 2), dotW, dotH);
+      }
+      //Waende
       g.setColor(new Color(128, 0, 128));
       if(mauer != null)
       {
@@ -226,6 +234,22 @@ public class MazePanel extends JPanel
             },
             4);
         g.fillPolygon(polygon);
+        if((isExit && direction == 3) || (isEntrance && direction == 1))
+        {
+          polygon.xpoints[1] += (polygon.xpoints[3] - polygon.xpoints[1]) * .25;
+          polygon.ypoints[1] += (polygon.ypoints[0] - polygon.ypoints[1]) * .33;
+          polygon.xpoints[2] -= (polygon.xpoints[2] - polygon.xpoints[0]) * .20;
+          polygon.ypoints[2] += (polygon.ypoints[3] - polygon.ypoints[2]) * .33;
+
+          polygon.xpoints[0] += (polygon.xpoints[3] - polygon.xpoints[0]) * .25;
+          polygon.ypoints[0] += (polygon.ypoints[3] - polygon.ypoints[0]) * .25;
+          polygon.xpoints[3] -= (polygon.xpoints[3] - polygon.xpoints[0]) * .25;
+          polygon.ypoints[3] -= (polygon.ypoints[3] - polygon.ypoints[0]) * .25;
+          Color old = g.getColor();
+          g.setColor(Color.GREEN.darker());
+          g.fillPolygon(polygon);
+          g.setColor(old);
+        }
       }
       else
       {
@@ -245,6 +269,22 @@ public class MazePanel extends JPanel
             },
             4);
         g.fillPolygon(polygon);
+        if((isExit && direction == 1) || (isEntrance && direction == 3))
+        {
+          polygon.xpoints[3] += (polygon.xpoints[1] - polygon.xpoints[3]) * .25;
+          polygon.ypoints[3] += (polygon.ypoints[2] - polygon.ypoints[3]) * .33;
+          polygon.xpoints[0] -= (polygon.xpoints[0] - polygon.xpoints[2]) * .20;
+          polygon.ypoints[0] += (polygon.ypoints[1] - polygon.ypoints[0]) * .33;
+
+          polygon.xpoints[2] += (polygon.xpoints[1] - polygon.xpoints[2]) * .25;
+          polygon.ypoints[2] += (polygon.ypoints[1] - polygon.ypoints[2]) * .25;
+          polygon.xpoints[1] -= (polygon.xpoints[1] - polygon.xpoints[2]) * .25;
+          polygon.ypoints[1] -= (polygon.ypoints[1] - polygon.ypoints[2]) * .25;
+          Color old = g.getColor();
+          g.setColor(Color.GREEN.darker());
+          g.fillPolygon(polygon);
+          g.setColor(old);
+        }
       }
       else
       {
@@ -253,13 +293,15 @@ public class MazePanel extends JPanel
       ((Graphics2D)g).setPaint(null);
       if(cell.hasWall(direction))
       {
-        g.fillRect(minx + innerDelta, miny + innerDelta, innerWidth, innerWidth);
+        g.fillRect(inner[0].x, inner[0].y, innerWidth, innerWidth);
         if((isExit && direction == 2)
             || (isEntrance && direction == 0))
         {
-          g.setColor(Color.ORANGE.darker());
+          Color old = g.getColor();
+          g.setColor(Color.GREEN.darker());
           g.fillRect(minx + innerDelta + 2 * wallwidth, miny + innerDelta + 2 * wallwidth,
               innerWidth - (4 * wallwidth), innerWidth - (2 * wallwidth));
+          g.setColor(old);
         }
       }
 

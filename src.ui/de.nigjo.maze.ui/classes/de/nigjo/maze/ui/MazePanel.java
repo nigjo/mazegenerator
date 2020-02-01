@@ -103,6 +103,15 @@ public class MazePanel extends JPanel
     repaint();
   }
 
+  private Color getColor(Color from, Color to, int pos, int max)
+  {
+    double percent = pos / (double)max;
+    int red = from.getRed() + (int)((to.getRed() - from.getRed()) * percent);
+    int green = from.getGreen()+ (int)((to.getGreen() - from.getGreen()) * percent);
+    int blue = from.getBlue()+ (int)((to.getBlue() - from.getBlue()) * percent);
+    return new Color(red, green, blue);
+  }
+
   private static class MoveAction extends AbstractAction
   {
     private final Runnable runner;
@@ -185,11 +194,15 @@ public class MazePanel extends JPanel
       inner[3].x = minx + innerDelta;
       inner[3].y = miny + innerDelta + innerWidth;
 
+      int id = maze.getCellId(cell);
+      int cCol = id % maze.getWidth();
+      int cRow = (id - cCol) / maze.getWidth();
+
       //Decke
-      g.setColor(Color.RED);
+      g.setColor(getColor(Color.ORANGE.darker(), Color.RED, cCol, maze.getWidth()));
       g.fillRect(outer[0].x, outer[0].y, outerWidth, wallwidth);
       //Boden
-      g.setColor(Color.BLUE);
+      g.setColor(getColor(Color.BLUE, Color.CYAN.darker(), cRow, maze.getWidth()));
       g.fillRect(outer[3].x, inner[3].y, outerWidth, wallwidth);
       g.setColor(new Color(128, 0, 128));
       if(mauer != null)

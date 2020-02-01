@@ -120,35 +120,33 @@ public class MazePanel extends JPanel
 
   }
 
+  private final int VIEW_WIDTH = 6;
+
   @Override
   protected void paintComponent(Graphics g)
   {
     super.paintComponent(g);
     Dimension size = getSize();
 
-    g.setColor(Color.BLUE);
-
+//    g.setColor(Color.BLUE);
 //    g.drawLine(0, 0, size.width - 1, size.height - 1);
 //    g.drawLine(0, size.height - 1, size.width - 1, 0);
     List<Cell> ahead = new ArrayList<>();
     ahead.add(current);
     Cell sibling = current;
-    while(!sibling.hasWall(this.direction))
+    while(ahead.size() < VIEW_WIDTH && !sibling.hasWall(this.direction))
     {
       sibling = sibling.getSiblings().get(this.direction);
       ahead.add(0, sibling);
     };
 
-    int viewwidth = 6;
     int quader = size.width < size.height ? size.width - 1 : size.height - 1;
     int minx = (size.width - quader) / 2;
     int miny = (size.height - quader) / 2;
-    int stepcount = ((viewwidth + 1) * (viewwidth + 2)) / 2;
+    int stepcount = ((VIEW_WIDTH + 1) * (VIEW_WIDTH + 2)) / 2;
     double stepwidth = quader / 2. / (stepcount + 1);
 
-    int viewlength = ahead.size() >= viewwidth ? viewwidth : ahead.size();
-    List<Cell> view = viewlength == ahead.size() ? ahead : ahead
-        .subList(ahead.size() - viewlength, viewlength + 1);
+    List<Cell> view = ahead;
     int pos = view.size();
     Point outer[] = new Point[4];
     Point inner[] = new Point[4];
@@ -159,7 +157,7 @@ public class MazePanel extends JPanel
     }
     for(Cell cell : view)
     {
-      int viewindex = (viewwidth - pos + 1);
+      int viewindex = (VIEW_WIDTH - pos + 1);
       int innerCount = ((viewindex * (viewindex + 1)) / 2) + 1;
       int outerCount = (((viewindex + 1) * (viewindex + 2)) / 2) + 1;
       int innerDelta = quader / 2 - (int)(innerCount * stepwidth);

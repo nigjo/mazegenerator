@@ -38,7 +38,7 @@ public class Config
     {
       height = Integer.parseInt(args[1]);
     }
-    if(args.length > 2 && !args[2].isBlank())
+    if(args.length > 2 && !args[2].isEmpty())
     {
       try
       {

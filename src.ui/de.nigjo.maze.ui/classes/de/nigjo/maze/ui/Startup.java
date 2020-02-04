@@ -15,9 +15,11 @@
  */
 package de.nigjo.maze.ui;
 
+import java.beans.PropertyChangeEvent;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -25,6 +27,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import de.nigjo.maze.core.Config;
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
+import de.nigjo.maze.core.QuadraticMazePainter;
 
 /**
  *
@@ -41,7 +44,9 @@ public class Startup
     MazeGenerator generator = null;
     Iterator<MazeGenerator> iterator = generators.iterator();
     while(iterator.hasNext())
+    {
       generator = iterator.next();
+    }
     if(generator != null)
     {
       SwingUtilities.invokeLater(Startup::initUI);
@@ -54,7 +59,12 @@ public class Startup
   {
     Maze maze = generator.generateMaze(cfg.getSeed(), cfg.getParameters());
 
+    System.out.println(QuadraticMazePainter.toString(maze));
     SwingUtilities.invokeLater(() -> FrameBuilder.setMaze(maze));
+
+    SwingUtilities.invokeLater(() -> FrameBuilder.findMazePanel()
+        .ifPresent(mp -> mp.addPropertyChangeListener("MazePanel.solved",
+            Startup::mazeSolved)));
   }
 
   private static void initUI()
@@ -63,13 +73,21 @@ public class Startup
     {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     }
-    catch(ClassNotFoundException | InstantiationException | IllegalAccessException |
-        UnsupportedLookAndFeelException ex)
+    catch(ClassNotFoundException | InstantiationException | IllegalAccessException
+        | UnsupportedLookAndFeelException ex)
     {
       ex.printStackTrace(System.err);
     }
 
     FrameBuilder.buildFrame();
+  }
+
+  private static void mazeSolved(PropertyChangeEvent evt)
+  {
+    MazePanel mp = (MazePanel)evt.getSource();
+    JOptionPane.showMessageDialog(mp, "Ausgang gefunden!",
+        "MazeWalker", JOptionPane.INFORMATION_MESSAGE);
+    SwingUtilities.getWindowAncestor(mp).dispose();
   }
 
 }

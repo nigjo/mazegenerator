@@ -66,6 +66,7 @@
   <target name="release" description="create a release zip">
     <property name="do.jar" value="true"/>
     <property name="do.jlink" value="true"/>
+    <property name="config" value="Run_UI"/>
     <antcall target="deploy"/>
   </target>
   <target name="-pre-jar">

@@ -30,7 +30,7 @@ public class QuadraticMazePainter
 
   private static final char WAY = '·';
   private static final char DEADEND = '·';//'◦';
-  private static final char WALKED = System.console()==null?'•':'#';//'•';
+  private static final char WALKED = System.console() == null ? '•' : '#';//'•';
   private static final char NOW = '*';
 
   public static String toString(Maze maze)
@@ -59,9 +59,10 @@ public class QuadraticMazePainter
       {
         Cell c = cells.get(row * width + col);
         char mark =
-            c.getMark() == MARK_CURRENT ? NOW :
-            c.getMark() == MARK_WALKED ? WALKED :
-            c.getMark() == 2 ? DEADEND : WAY;
+            c.getMark() == MARK_CURRENT ? NOW
+            : c.getMark() == MARK_WALKED ? WALKED
+            : c.getMark() == 2 ? DEADEND
+            : WAY;
         b.append(' ').append(mark).append(' ');
         char waypoint = WAY;
         if(mark == WALKED && !c.hasWall(1) && c.getSiblings().get(1).getMark() == 1)

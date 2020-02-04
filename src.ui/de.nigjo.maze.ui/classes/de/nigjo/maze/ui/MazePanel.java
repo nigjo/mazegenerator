@@ -48,16 +48,22 @@ public class MazePanel extends JPanel
     super(new FlowLayout(FlowLayout.LEADING));
     super.setPreferredSize(new java.awt.Dimension(800, 800));
     super.setBackground(Color.BLACK);
+    super.setFocusable(true);
+  }
+
+  @Override
+  public void addNotify()
+  {
+    super.addNotify(); //To change body of generated methods, choose Tools | Templates.
+    requestFocusInWindow();
   }
 
   BufferedImage mauer;
 
-  void setMaze(Maze maze)
+  public void setMaze(Maze maze)
   {
     this.maze = maze;
     this.current = maze.getEntance();
-
-    System.out.println(QuadraticMazePainter.toString(maze));
 
 //    try
 //    {
@@ -67,7 +73,7 @@ public class MazePanel extends JPanel
 //    {
 //      ex.printStackTrace();
 //    }
-    InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
+    InputMap inputMap = getInputMap(WHEN_FOCUSED);
     inputMap.put(getKeyStroke(KeyEvent.VK_UP, 0), "moveForward");
     inputMap.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "rotateLeft");
     inputMap.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "rotateRight");
@@ -88,6 +94,10 @@ public class MazePanel extends JPanel
       current.setMark(QuadraticMazePainter.MARK_CURRENT);
       //System.out.println(QuadraticMazePainter.toString(maze));
       repaint();
+    }
+    else if(maze.isExit(current) && direction == 2)
+    {
+      putClientProperty("MazePanel.solved", true);
     }
   }
 
@@ -130,6 +140,12 @@ public class MazePanel extends JPanel
   }
 
   private final int VIEW_WIDTH = 6;
+  private final int X = 0;
+  private final int Y = 1;
+  private final int OL = 0;
+  private final int OR = 1;
+  private final int UR = 2;
+  private final int UL = 3;
 
   @Override
   protected void paintComponent(Graphics g)
@@ -137,9 +153,6 @@ public class MazePanel extends JPanel
     super.paintComponent(g);
     Dimension size = getSize();
 
-//    g.setColor(Color.BLUE);
-//    g.drawLine(0, 0, size.width - 1, size.height - 1);
-//    g.drawLine(0, size.height - 1, size.width - 1, 0);
     List<Cell> ahead = new ArrayList<>();
     ahead.add(current);
     Cell sibling = current;
@@ -147,13 +160,17 @@ public class MazePanel extends JPanel
     {
       sibling = sibling.getSiblings().get(this.direction);
       ahead.add(0, sibling);
-    };
+    }
 
-    int quader = size.width < size.height ? size.width - 1 : size.height - 1;
-    int minx = (size.width - quader) / 2;
-    int miny = (size.height - quader) / 2;
+    int quader[] =
+    {
+      size.width - 1, size.height - 1
+    };
+    int minx = 0;//(size.width - quader) / 2;
+    int miny = 0;//(size.height - quader) / 2;
     int stepcount = ((VIEW_WIDTH + 1) * (VIEW_WIDTH + 2)) / 2;
-    double stepwidth = quader / 2. / (stepcount + 1);
+    double stepWidth = quader[X] / 2. / (stepcount + 1);
+    double stepHeight = quader[Y] / 2. / (stepcount + 1);
 
     List<Cell> view = ahead;
     int pos = view.size();
@@ -169,30 +186,50 @@ public class MazePanel extends JPanel
       int viewindex = (VIEW_WIDTH - pos + 1);
       int innerCount = ((viewindex * (viewindex + 1)) / 2) + 1;
       int outerCount = (((viewindex + 1) * (viewindex + 2)) / 2) + 1;
-      int innerDelta = quader / 2 - (int)(innerCount * stepwidth);
-      int outerDelta = quader / 2 - (int)(outerCount * stepwidth);
-      int innerWidth = quader - (innerDelta * 2);
-      int outerWidth = quader - (outerDelta * 2);
-      int wallwidth = innerDelta - outerDelta;
+      int[] innerDelta =
+      {
+        quader[X] / 2 - (int)(innerCount * stepWidth),
+        quader[Y] / 2 - (int)(innerCount * stepHeight)
+      };
+      int[] outerDelta =
+      {
+        quader[X] / 2 - (int)(outerCount * stepWidth),
+        quader[Y] / 2 - (int)(outerCount * stepHeight)
+      };
+      int[] innerWidth =
+      {
+        quader[X] - (innerDelta[X] * 2),
+        quader[Y] - (innerDelta[Y] * 2)
+      };
+      int[] outerWidth =
+      {
+        quader[X] - (outerDelta[X] * 2),
+        quader[Y] - (outerDelta[Y] * 2)
+      };
+      int[] wallwidth =
+      {
+        innerDelta[X] - outerDelta[X],
+        innerDelta[Y] - outerDelta[Y]
+      };
       boolean isExit = maze.isExit(cell);
       boolean isEntrance = cell == maze.getEntance();
 
-      outer[0].x = minx + outerDelta;
-      outer[0].y = miny + outerDelta;
-      outer[1].x = minx + outerDelta + outerWidth;
-      outer[1].y = miny + outerDelta;
-      outer[2].x = minx + outerDelta + outerWidth;
-      outer[2].y = miny + outerDelta + outerWidth;
-      outer[3].x = minx + outerDelta;
-      outer[3].y = miny + outerDelta + outerWidth;
-      inner[0].x = minx + innerDelta;
-      inner[0].y = miny + innerDelta;
-      inner[1].x = minx + innerDelta + innerWidth;
-      inner[1].y = miny + innerDelta;
-      inner[2].x = minx + innerDelta + innerWidth;
-      inner[2].y = miny + innerDelta + innerWidth;
-      inner[3].x = minx + innerDelta;
-      inner[3].y = miny + innerDelta + innerWidth;
+      outer[OL].x = minx + outerDelta[X];
+      outer[OL].y = miny + outerDelta[Y];
+      outer[OR].x = minx + outerDelta[X] + outerWidth[X];
+      outer[OR].y = miny + outerDelta[Y];
+      outer[UR].x = minx + outerDelta[X] + outerWidth[X];
+      outer[UR].y = miny + outerDelta[Y] + outerWidth[Y];
+      outer[UL].x = minx + outerDelta[X];
+      outer[UL].y = miny + outerDelta[Y] + outerWidth[Y];
+      inner[OL].x = minx + innerDelta[X];
+      inner[OL].y = miny + innerDelta[Y];
+      inner[OR].x = minx + innerDelta[X] + innerWidth[X];
+      inner[OR].y = miny + innerDelta[Y];
+      inner[UR].x = minx + innerDelta[X] + innerWidth[X];
+      inner[UR].y = miny + innerDelta[Y] + innerWidth[Y];
+      inner[UL].x = minx + innerDelta[X];
+      inner[UL].y = miny + innerDelta[Y] + innerWidth[Y];
 
       int id = maze.getCellId(cell);
       int cCol = id % maze.getWidth();
@@ -200,51 +237,51 @@ public class MazePanel extends JPanel
 
       //Decke
       g.setColor(getColor(Color.ORANGE.darker(), Color.RED, cCol, maze.getWidth()));
-      g.fillRect(outer[0].x, outer[0].y, outerWidth, wallwidth);
+      g.fillRect(outer[OL].x, outer[OL].y, outerWidth[X], wallwidth[Y]);
       //Boden
       g.setColor(getColor(Color.BLUE, Color.CYAN.darker(), cRow, maze.getWidth()));
-      g.fillRect(outer[3].x, inner[3].y, outerWidth, wallwidth);
+      g.fillRect(outer[UL].x, inner[UL].y, outerWidth[X], wallwidth[Y]);
       if(cell.getMark() == 1)
       {
         g.setColor(g.getColor().darker());
-        int dotW = (inner[2].x - inner[3].x) / 2;
-        int dotH = (outer[3].y - inner[3].y) / 2;
-        g.fillOval(inner[3].x + (dotW / 2), inner[3].y + (dotH / 2), dotW, dotH);
+        int dotW = (inner[UR].x - inner[UL].x) / 2;
+        int dotH = (outer[UL].y - inner[UL].y) / 2;
+        g.fillOval(inner[UL].x + (dotW / 2), inner[UL].y + (dotH / 2), dotW, dotH);
       }
       //Waende
       g.setColor(new Color(128, 0, 128));
       if(mauer != null)
       {
         ((Graphics2D)g).setPaint(new TexturePaint(mauer,
-            new Rectangle(inner[1].x, inner[1].y, wallwidth, innerWidth)));
+            new Rectangle(inner[OR].x, inner[OR].y, wallwidth[X], innerWidth[Y])));
       }
 //      ((Graphics2D)g).setPaint(new GradientPaint(
-//          0f, inner[0].y, Color.RED, 0f, inner[3].y, Color.BLUE));
+//          0f, inner[OL].y, Color.RED, 0f, inner[UL].y, Color.BLUE));
       if(cell.hasWall((direction + 4 - 1) % 4))
       {
         //links
         Polygon polygon = new Polygon(
             new int[]
             {
-              outer[3].x, outer[0].x, inner[0].x, inner[3].x
+              outer[OL].x, inner[OL].x, inner[UL].x, outer[UL].x
             },
             new int[]
             {
-              outer[3].y, outer[0].y, inner[0].y, inner[3].y
+              outer[OL].y, inner[OL].y, inner[UL].y, outer[UL].y
             },
             4);
         g.fillPolygon(polygon);
         if((isExit && direction == 3) || (isEntrance && direction == 1))
         {
-          polygon.xpoints[1] += (polygon.xpoints[3] - polygon.xpoints[1]) * .25;
-          polygon.ypoints[1] += (polygon.ypoints[0] - polygon.ypoints[1]) * .33;
-          polygon.xpoints[2] -= (polygon.xpoints[2] - polygon.xpoints[0]) * .20;
-          polygon.ypoints[2] += (polygon.ypoints[3] - polygon.ypoints[2]) * .33;
+          polygon.xpoints[OL] += (polygon.xpoints[UR] - polygon.xpoints[OL]) * .25;
+          polygon.ypoints[OL] += (polygon.ypoints[UL] - polygon.ypoints[OL]) * .33;
+          polygon.xpoints[OR] -= (polygon.xpoints[OR] - polygon.xpoints[UL]) * .20;
+          polygon.ypoints[OR] += (polygon.ypoints[UR] - polygon.ypoints[OR]) * .33;
 
-          polygon.xpoints[0] += (polygon.xpoints[3] - polygon.xpoints[0]) * .25;
-          polygon.ypoints[0] += (polygon.ypoints[3] - polygon.ypoints[0]) * .25;
-          polygon.xpoints[3] -= (polygon.xpoints[3] - polygon.xpoints[0]) * .25;
-          polygon.ypoints[3] -= (polygon.ypoints[3] - polygon.ypoints[0]) * .25;
+          polygon.xpoints[UL] += (polygon.xpoints[UR] - polygon.xpoints[UL]) * .25;
+          polygon.ypoints[UL] += (polygon.ypoints[UR] - polygon.ypoints[UL]) * .25;
+          polygon.xpoints[UR] -= (polygon.xpoints[UR] - polygon.xpoints[UL]) * .25;
+          polygon.ypoints[UR] -= (polygon.ypoints[UR] - polygon.ypoints[UL]) * .25;
           Color old = g.getColor();
           g.setColor(Color.GREEN.darker());
           g.fillPolygon(polygon);
@@ -253,7 +290,7 @@ public class MazePanel extends JPanel
       }
       else
       {
-        g.fillRect(outer[0].x, inner[0].y, wallwidth, innerWidth);
+        g.fillRect(outer[OL].x, inner[OL].y, wallwidth[X], innerWidth[Y]);
       }
       if(cell.hasWall((direction + 1) % 4))
       {
@@ -261,11 +298,11 @@ public class MazePanel extends JPanel
         Polygon polygon = new Polygon(
             new int[]
             {
-              outer[1].x, outer[2].x, inner[2].x, inner[1].x
+              outer[OR].x, outer[UR].x, inner[UR].x, inner[OR].x
             },
             new int[]
             {
-              outer[1].y, outer[2].y, inner[2].y, inner[1].y
+              outer[OR].y, outer[UR].y, inner[UR].y, inner[OR].y
             },
             4);
         g.fillPolygon(polygon);
@@ -288,50 +325,52 @@ public class MazePanel extends JPanel
       }
       else
       {
-        g.fillRect(inner[1].x, inner[1].y, wallwidth, innerWidth);
+        g.fillRect(inner[OR].x, inner[OR].y, wallwidth[X], innerWidth[Y]);
       }
       ((Graphics2D)g).setPaint(null);
       if(cell.hasWall(direction))
       {
-        g.fillRect(inner[0].x, inner[0].y, innerWidth, innerWidth);
+        g.fillRect(inner[OL].x, inner[OL].y, innerWidth[X], innerWidth[Y]);
         if((isExit && direction == 2)
             || (isEntrance && direction == 0))
         {
           Color old = g.getColor();
           g.setColor(Color.GREEN.darker());
-          g.fillRect(minx + innerDelta + 2 * wallwidth, miny + innerDelta + 2 * wallwidth,
-              innerWidth - (4 * wallwidth), innerWidth - (2 * wallwidth));
+          g.fillRect(minx + innerDelta[X] + 2 * wallwidth[X],
+              miny + innerDelta[Y] + 2 * wallwidth[Y],
+              innerWidth[X] - (4 * wallwidth[X]),
+              innerWidth[Y] - (2 * wallwidth[Y]));
           g.setColor(old);
         }
       }
 
       g.setColor(Color.BLACK);
-      g.drawLine(outer[0].x, outer[0].y, inner[0].x, inner[0].y);
-      g.drawLine(outer[1].x, outer[1].y, inner[1].x, inner[1].y);
-      g.drawLine(outer[2].x, outer[2].y, inner[2].x, inner[2].y);
-      g.drawLine(outer[3].x, outer[3].y, inner[3].x, inner[3].y);
-      g.drawRect(minx + innerDelta, miny + innerDelta, innerWidth, innerWidth);
+      g.drawLine(outer[OL].x, outer[OL].y, inner[OL].x, inner[OL].y);
+      g.drawLine(outer[OR].x, outer[OR].y, inner[OR].x, inner[OR].y);
+      g.drawLine(outer[UR].x, outer[UR].y, inner[UR].x, inner[UR].y);
+      g.drawLine(outer[UL].x, outer[UL].y, inner[UL].x, inner[UL].y);
+      g.drawRect(minx + innerDelta[X], miny + innerDelta[Y], innerWidth[X], innerWidth[Y]);
       if(!cell.hasWall((direction + 4 - 1) % 4))
       {
-        g.drawRect(outer[0].x, inner[0].y, wallwidth, innerWidth);
+        g.drawRect(outer[OL].x, inner[OL].y, wallwidth[X], innerWidth[Y]);
       }
       else
       {
-        g.drawLine(outer[0].x, outer[0].y, inner[3].x, inner[3].y);
-        g.drawLine(outer[3].x, outer[3].y, inner[0].x, inner[0].y);
+        g.drawLine(outer[OL].x, outer[OL].y, inner[UL].x, inner[UL].y);
+        g.drawLine(outer[UL].x, outer[UL].y, inner[OL].x, inner[OL].y);
       }
       if(!cell.hasWall((direction + 1) % 4))
       {
-        g.drawRect(inner[1].x, inner[1].y, wallwidth, innerWidth);
+        g.drawRect(inner[OR].x, inner[OR].y, wallwidth[X], innerWidth[Y]);
       }
       else
       {
-        g.drawLine(outer[1].x, outer[1].y, inner[2].x, inner[2].y);
-        g.drawLine(outer[2].x, outer[2].y, inner[1].x, inner[1].y);
+        g.drawLine(outer[OR].x, outer[OR].y, inner[UR].x, inner[UR].y);
+        g.drawLine(outer[UR].x, outer[UR].y, inner[OR].x, inner[OR].y);
       }
       pos--;
     }
-    g.drawRect(minx, miny, quader, quader);
+    g.drawRect(minx, miny, quader[X], quader[Y]);
   }
 
   private void logCell(Cell cell)

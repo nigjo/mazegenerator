@@ -87,6 +87,16 @@ public class MazePanel extends JPanel
   public void addNotify()
   {
     super.addNotify(); //To change body of generated methods, choose Tools | Templates.
+
+    InputMap inputMap = getInputMap(WHEN_FOCUSED);
+    inputMap.put(getKeyStroke(KeyEvent.VK_UP, 0), "moveForward");
+    inputMap.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "rotateLeft");
+    inputMap.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "rotateRight");
+    ActionMap actionMap = getActionMap();
+    actionMap.put("moveForward", new MoveAction(this::moveForward));
+    actionMap.put("rotateLeft", new MoveAction(this::rotateLeft));
+    actionMap.put("rotateRight", new MoveAction(this::rotateRight));
+
     requestFocusInWindow();
   }
 
@@ -97,22 +107,12 @@ public class MazePanel extends JPanel
     this.maze = maze;
     this.current = maze.getEntance();
 
-//    try
-//    {
-//      mauer = ImageIO.read(getClass().getResource("mauer.png"));
-//    }
-//    catch(IOException ex)
-//    {
-//      ex.printStackTrace();
-//    }
-    InputMap inputMap = getInputMap(WHEN_FOCUSED);
-    inputMap.put(getKeyStroke(KeyEvent.VK_UP, 0), "moveForward");
-    inputMap.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "rotateLeft");
-    inputMap.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "rotateRight");
-    ActionMap actionMap = getActionMap();
-    actionMap.put("moveForward", new MoveAction(this::moveForward));
-    actionMap.put("rotateLeft", new MoveAction(this::rotateLeft));
-    actionMap.put("rotateRight", new MoveAction(this::rotateRight));
+    if(this.maze != null)
+    {
+      super.removeAll();
+      WalkedHint hint = new WalkedHint();
+      add(hint);
+    }
 
     repaint();
   }

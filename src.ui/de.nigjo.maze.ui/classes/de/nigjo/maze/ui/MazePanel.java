@@ -20,6 +20,8 @@ import java.util.List;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
@@ -101,6 +103,14 @@ public class MazePanel extends JPanel
   }
 
   BufferedImage mauer;
+  ComponentAdapter resizer;
+
+  private void moveToUpperRight(WalkedHint hint)
+  {
+    Dimension compsize = hint.getPreferredSize();
+    hint.setLocation(getWidth() - compsize.width - 5, 5);
+    hint.setSize(compsize);
+  }
 
   public void setMaze(Maze maze)
   {
@@ -110,7 +120,21 @@ public class MazePanel extends JPanel
     if(this.maze != null)
     {
       super.removeAll();
+      removeComponentListener(resizer);
       WalkedHint hint = new WalkedHint();
+      hint.setMaze(maze);
+      moveToUpperRight(hint);
+      resizer = new ComponentAdapter()
+      {
+        @Override
+        public void componentResized(ComponentEvent e)
+        {
+          super.componentResized(e);
+          moveToUpperRight(hint);
+        }
+
+      };
+      addComponentListener(resizer);
       add(hint);
     }
 

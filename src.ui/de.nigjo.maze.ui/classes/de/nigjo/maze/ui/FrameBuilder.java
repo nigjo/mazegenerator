@@ -18,6 +18,7 @@ package de.nigjo.maze.ui;
 import java.util.Arrays;
 import java.util.Optional;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import de.nigjo.maze.core.Maze;
@@ -35,6 +36,11 @@ public class FrameBuilder
     JFrame frame = new JFrame(FRAME_TITLE);
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     frame.setLocationByPlatform(true);
+    frame.setIconImages(Arrays.asList(
+        new ImageIcon(FrameBuilder.class.getResource("frameicon.png")).getImage(),
+        new ImageIcon(FrameBuilder.class.getResource("frameicon32.png")).getImage(),
+        new ImageIcon(FrameBuilder.class.getResource("frameicon64.png")).getImage()
+    ));
 
     frame.getContentPane().add(new MazePanel());
 

@@ -28,6 +28,7 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JPanel;
 import static javax.swing.KeyStroke.getKeyStroke;
+import javax.swing.UIManager;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
@@ -43,12 +44,43 @@ public class MazePanel extends JPanel
   private Cell current;
   private Maze maze;
 
+  private static final String PREFIX = "de.nigjo.maze.ui.MazePanel";
+  private static final String PROP_COLOR_BACKGROUND = PREFIX + ".background";
+  private static final String PROP_COLOR_CEILING_FROM = PREFIX + ".ceilingFrom";
+  private static final String PROP_COLOR_CEILING_TO = PREFIX + ".ceilingTo";
+  private static final String PROP_COLOR_WALL = PREFIX + ".wall";
+  private static final String PROP_COLOR_FLOOR_FROM = PREFIX + ".floorFrom";
+  private static final String PROP_COLOR_FLOOR_TO = PREFIX + ".floorTo";
+  private static final String PROP_COLOR_WALL_CROSS = PREFIX + ".wallCross";
+  private static final String PROP_COLOR_WALL_BOUND = PREFIX + ".wallBound";
+  private static final String PROP_COLOR_DOOR_ENTRANCE = PREFIX + ".doorEntrance";
+  private static final String PROP_COLOR_DOOR_EXIT = PREFIX + ".doorExit";
+
+  static
+  {
+    UIManager.getDefaults().putIfAbsent("de.nigjo.maze.ui.MazePanel.prefWidth", 800);
+    UIManager.getDefaults().putIfAbsent("de.nigjo.maze.ui.MazePanel.prefHeight", 800);
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_BACKGROUND, Color.BLACK);
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_CEILING_FROM, Color.ORANGE.darker());
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_CEILING_TO, Color.RED);
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_WALL, new Color(128, 0, 128));
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_WALL_CROSS, Color.GRAY);
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_WALL_BOUND, Color.BLACK);
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_FLOOR_FROM, Color.BLUE);
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_FLOOR_TO, Color.CYAN.darker());
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_DOOR_ENTRANCE, Color.YELLOW.darker());
+    UIManager.getDefaults().putIfAbsent(PROP_COLOR_DOOR_EXIT, Color.GREEN.darker());
+  }
+
   public MazePanel()
   {
-    super(new FlowLayout(FlowLayout.LEADING));
-    super.setPreferredSize(new java.awt.Dimension(800, 800));
-    super.setBackground(Color.BLACK);
+    super(null);
+    super.setPreferredSize(new java.awt.Dimension(
+        UIManager.getInt("de.nigjo.maze.ui.MazePanel.prefWidth"),
+        UIManager.getInt("de.nigjo.maze.ui.MazePanel.prefHeight")));
+    super.setBackground(UIManager.getColor(PROP_COLOR_BACKGROUND));
     super.setFocusable(true);
+    super.setDoubleBuffered(true);
   }
 
   @Override
@@ -236,10 +268,12 @@ public class MazePanel extends JPanel
       int cRow = (id - cCol) / maze.getWidth();
 
       //Decke
-      g.setColor(getColor(Color.ORANGE.darker(), Color.RED, cCol, maze.getWidth()));
+      g.setColor(getColor(UIManager.getColor(PROP_COLOR_CEILING_FROM),
+          UIManager.getColor(PROP_COLOR_CEILING_TO), cCol, maze.getWidth()));
       g.fillRect(outer[OL].x, outer[OL].y, outerWidth[X], wallwidth[Y]);
       //Boden
-      g.setColor(getColor(Color.BLUE, Color.CYAN.darker(), cRow, maze.getWidth()));
+      g.setColor(getColor(UIManager.getColor(PROP_COLOR_FLOOR_FROM),
+          UIManager.getColor(PROP_COLOR_FLOOR_TO), cRow, maze.getWidth()));
       g.fillRect(outer[UL].x, inner[UL].y, outerWidth[X], wallwidth[Y]);
       if(cell.getMark() == 1)
       {
@@ -249,7 +283,7 @@ public class MazePanel extends JPanel
         g.fillOval(inner[UL].x + (dotW / 2), inner[UL].y + (dotH / 2), dotW, dotH);
       }
       //Waende
-      g.setColor(new Color(128, 0, 128));
+      g.setColor(UIManager.getColor(PROP_COLOR_WALL));
       if(mauer != null)
       {
         ((Graphics2D)g).setPaint(new TexturePaint(mauer,
@@ -283,7 +317,9 @@ public class MazePanel extends JPanel
           polygon.xpoints[UR] -= (polygon.xpoints[UR] - polygon.xpoints[UL]) * .25;
           polygon.ypoints[UR] -= (polygon.ypoints[UR] - polygon.ypoints[UL]) * .25;
           Color old = g.getColor();
-          g.setColor(Color.GREEN.darker());
+
+          g.setColor(UIManager.getColor(
+              isExit ? PROP_COLOR_DOOR_EXIT : PROP_COLOR_DOOR_ENTRANCE));
           g.fillPolygon(polygon);
           g.setColor(old);
         }
@@ -318,7 +354,8 @@ public class MazePanel extends JPanel
           polygon.xpoints[1] -= (polygon.xpoints[1] - polygon.xpoints[2]) * .25;
           polygon.ypoints[1] -= (polygon.ypoints[1] - polygon.ypoints[2]) * .25;
           Color old = g.getColor();
-          g.setColor(Color.GREEN.darker());
+          g.setColor(UIManager.getColor(
+              isExit ? PROP_COLOR_DOOR_EXIT : PROP_COLOR_DOOR_ENTRANCE));
           g.fillPolygon(polygon);
           g.setColor(old);
         }
@@ -335,7 +372,8 @@ public class MazePanel extends JPanel
             || (isEntrance && direction == 0))
         {
           Color old = g.getColor();
-          g.setColor(Color.GREEN.darker());
+          g.setColor(UIManager.getColor(
+              isExit ? PROP_COLOR_DOOR_EXIT : PROP_COLOR_DOOR_ENTRANCE));
           g.fillRect(minx + innerDelta[X] + 2 * wallwidth[X],
               miny + innerDelta[Y] + 2 * wallwidth[Y],
               innerWidth[X] - (4 * wallwidth[X]),
@@ -344,7 +382,7 @@ public class MazePanel extends JPanel
         }
       }
 
-      g.setColor(Color.BLACK);
+      g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
       g.drawLine(outer[OL].x, outer[OL].y, inner[OL].x, inner[OL].y);
       g.drawLine(outer[OR].x, outer[OR].y, inner[OR].x, inner[OR].y);
       g.drawLine(outer[UR].x, outer[UR].y, inner[UR].x, inner[UR].y);
@@ -352,24 +390,29 @@ public class MazePanel extends JPanel
       g.drawRect(minx + innerDelta[X], miny + innerDelta[Y], innerWidth[X], innerWidth[Y]);
       if(!cell.hasWall((direction + 4 - 1) % 4))
       {
+        g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
         g.drawRect(outer[OL].x, inner[OL].y, wallwidth[X], innerWidth[Y]);
       }
       else
       {
+        g.setColor(UIManager.getColor(PROP_COLOR_WALL_CROSS));
         g.drawLine(outer[OL].x, outer[OL].y, inner[UL].x, inner[UL].y);
         g.drawLine(outer[UL].x, outer[UL].y, inner[OL].x, inner[OL].y);
       }
       if(!cell.hasWall((direction + 1) % 4))
       {
+        g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
         g.drawRect(inner[OR].x, inner[OR].y, wallwidth[X], innerWidth[Y]);
       }
       else
       {
+        g.setColor(UIManager.getColor(PROP_COLOR_WALL_CROSS));
         g.drawLine(outer[OR].x, outer[OR].y, inner[UR].x, inner[UR].y);
         g.drawLine(outer[UR].x, outer[UR].y, inner[OR].x, inner[OR].y);
       }
       pos--;
     }
+    g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
     g.drawRect(minx, miny, quader[X], quader[Y]);
   }
 

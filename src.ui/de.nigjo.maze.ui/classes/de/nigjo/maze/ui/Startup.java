@@ -16,9 +16,11 @@
 package de.nigjo.maze.ui;
 
 import java.beans.PropertyChangeEvent;
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -67,7 +69,12 @@ public class Startup
     SwingUtilities.invokeLater(() -> FrameBuilder.setMaze(maze));
 
     SwingUtilities.invokeLater(() -> FrameBuilder.findMazePanel().ifPresent(
-        mp -> mp.addPropertyChangeListener(MazePanel.PROP_SOLVED, Startup::mazeSolved)));
+        mp ->
+    {
+      mp.addPropertyChangeListener(MazePanel.PROP_SOLVED, Startup::mazeSolved);
+      mp.addPropertyChangeListener(MazePanel.PROP_CURRENT_CELL, Startup::startTimer);
+      mp.addPropertyChangeListener(MazePanel.PROP_DIRECTION, Startup::startTimer);
+    }));
   }
 
   private static void initUI()
@@ -85,11 +92,31 @@ public class Startup
     FrameBuilder.buildFrame();
   }
 
+  private static long starttime = 0;
+
+  private static void startTimer(PropertyChangeEvent evt)
+  {
+    if(starttime == 0)
+    {
+      starttime = System.currentTimeMillis();
+    }
+  }
+
   private static void mazeSolved(PropertyChangeEvent evt)
   {
+    String message = BUNDLE.getString("Startup.exit_found");
+    if(starttime > 0)
+    {
+      long finishedAt = System.currentTimeMillis();
+      long seconds = TimeUnit.MILLISECONDS.toSeconds(finishedAt - starttime);
+      System.out.println("seconds to solve: " + seconds);
+      message += "\n" + MessageFormat.format(BUNDLE.getString("Startup.duration"),
+          String.format("%02d:%02d", seconds / 60, seconds % 60));
+    }
+
     MazePanel mp = (MazePanel)evt.getSource();
     JOptionPane.showMessageDialog(mp,
-        BUNDLE.getString("Startup.exit_found"),
+        message,
         BUNDLE.getString("Startup.dlg_title"),
         JOptionPane.INFORMATION_MESSAGE);
     SwingUtilities.getWindowAncestor(mp).dispose();

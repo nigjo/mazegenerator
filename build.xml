@@ -90,18 +90,34 @@
     </jar>
   </target>
 
-  <target name="-post-deploy">
+  <target name="-pre-deploy">
+    <property name="jlink.additionalparam.extra" 
+              value="--release-info=add:GITHASH=${git.hash}"/>
+    <property name="jlink.additionalparam"
+              value="${jlink.additionalparam.base} ${jlink.additionalparam.extra}"/>
+  </target>
+
+  <target name="-post-deploy" depends="-check-jlink-output,makeinstall,-test-install"/>
+  <target name="-check-jlink-output">
     <available file="${dist.jlink.output}" property="dist.jlink.output.exist"/>
-    <copy todir="${dist.jlink.output}" if:set="dist.jlink.output.exist">
+  </target>
+  <target name="makeinstall" if="dist.jlink.output.exist">
+    <copy todir="${dist.jlink.output}">
       <fileset dir="${basedir}">
         <include name="MazeGenerator.cmd"/>
+        <include name="MazeGenerator.ico"/>
         <include name="LICENSE"/>
         <include name="READEME.md"/>
       </fileset>
     </copy>
-    <zip destfile="${dist.dir}/${application.title}.zip" compress="true"
-         update="true" if:set="dist.jlink.output.exist">
+    <zip destfile="${dist.dir}/${application.title}.zip"
+         compress="true" update="true">
       <fileset dir="${dist.jlink.output}" includes="**"/>
     </zip>
+  </target>
+  <target name="-test-install" if="create-local-install">
+    <delete dir="${basedir}/${application.title}"/>
+    <mkdir dir="${basedir}/${application.title}"/>
+    <unzip src="${dist.dir}/${application.title}.zip" dest="${basedir}/${application.title}"/>
   </target>
 </project>

@@ -17,6 +17,7 @@ package de.nigjo.maze.ui;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -29,7 +30,9 @@ import de.nigjo.maze.core.Maze;
  */
 public class FrameBuilder
 {
-  private static final String FRAME_TITLE = "Maze Walker";
+  private static final ResourceBundle BUNDLE =
+      ResourceBundle.getBundle(FrameBuilder.class.getPackageName() + ".Bundle");
+  private static final String FRAME_TITLE = BUNDLE.getString("FrameBuilder.title");
 
   public static void buildFrame()
   {

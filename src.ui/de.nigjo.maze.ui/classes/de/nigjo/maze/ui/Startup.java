@@ -17,6 +17,7 @@ package de.nigjo.maze.ui;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 
 import javax.swing.JOptionPane;
@@ -35,6 +36,9 @@ import de.nigjo.maze.core.QuadraticMazePainter;
  */
 public class Startup
 {
+  private static final ResourceBundle BUNDLE =
+      ResourceBundle.getBundle(Startup.class.getPackageName() + ".Bundle");
+
   public static void main(String[] args)
   {
     Config cfg = new Config();
@@ -62,9 +66,8 @@ public class Startup
     System.out.println(QuadraticMazePainter.toString(maze));
     SwingUtilities.invokeLater(() -> FrameBuilder.setMaze(maze));
 
-    SwingUtilities.invokeLater(() -> FrameBuilder.findMazePanel()
-        .ifPresent(mp -> mp.addPropertyChangeListener("MazePanel.solved",
-            Startup::mazeSolved)));
+    SwingUtilities.invokeLater(() -> FrameBuilder.findMazePanel().ifPresent(
+        mp -> mp.addPropertyChangeListener(MazePanel.PROP_SOLVED, Startup::mazeSolved)));
   }
 
   private static void initUI()
@@ -85,8 +88,10 @@ public class Startup
   private static void mazeSolved(PropertyChangeEvent evt)
   {
     MazePanel mp = (MazePanel)evt.getSource();
-    JOptionPane.showMessageDialog(mp, "Ausgang gefunden!",
-        "MazeWalker", JOptionPane.INFORMATION_MESSAGE);
+    JOptionPane.showMessageDialog(mp,
+        BUNDLE.getString("Startup.exit_found"),
+        BUNDLE.getString("Startup.dlg_title"),
+        JOptionPane.INFORMATION_MESSAGE);
     SwingUtilities.getWindowAncestor(mp).dispose();
   }
 

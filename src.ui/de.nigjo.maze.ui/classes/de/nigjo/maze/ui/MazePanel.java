@@ -37,12 +37,24 @@ import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.QuadraticMazePainter;
 
 /**
+ * A Panel to paint and walk a Maze.
  *
  * @author nigjo
  */
 public class MazePanel extends JPanel
 {
-  private int direction = 2;
+  public static final String PROP_DIRECTION = MazePanel.class.getName() + ".direction";
+  public static final String PROP_CURRENT_CELL =
+      MazePanel.class.getName() + ".current_cell";
+  public static final String PROP_SOLVED = MazePanel.class.getName() + ".solved";
+
+  public static final int DIR_COUNT = 4;
+  public static final int DIR_NORTH = 0;
+  public static final int DIR_EAST = 1;
+  public static final int DIR_SOUTH = 2;
+  public static final int DIR_WEST = 3;
+
+  private int direction;
   private Cell current;
   private Maze maze;
 
@@ -58,10 +70,13 @@ public class MazePanel extends JPanel
   private static final String PROP_COLOR_DOOR_ENTRANCE = PREFIX + ".doorEntrance";
   private static final String PROP_COLOR_DOOR_EXIT = PREFIX + ".doorExit";
 
+  private static final String PROP_PREFERRED_WIDTH = PREFIX + ".prefWidth";
+  private static final String PROP_PREFERRED_HEIGHT = PREFIX + ".prefHeight";
+
   static
   {
-    UIManager.getDefaults().putIfAbsent("de.nigjo.maze.ui.MazePanel.prefWidth", 800);
-    UIManager.getDefaults().putIfAbsent("de.nigjo.maze.ui.MazePanel.prefHeight", 800);
+    UIManager.getDefaults().putIfAbsent(PROP_PREFERRED_WIDTH, 800);
+    UIManager.getDefaults().putIfAbsent(PROP_PREFERRED_HEIGHT, 600);
     UIManager.getDefaults().putIfAbsent(PROP_COLOR_BACKGROUND, Color.BLACK);
     UIManager.getDefaults().putIfAbsent(PROP_COLOR_CEILING_FROM, Color.ORANGE.darker());
     UIManager.getDefaults().putIfAbsent(PROP_COLOR_CEILING_TO, Color.RED);
@@ -78,8 +93,8 @@ public class MazePanel extends JPanel
   {
     super(null);
     super.setPreferredSize(new java.awt.Dimension(
-        UIManager.getInt("de.nigjo.maze.ui.MazePanel.prefWidth"),
-        UIManager.getInt("de.nigjo.maze.ui.MazePanel.prefHeight")));
+        UIManager.getInt(PROP_PREFERRED_WIDTH),
+        UIManager.getInt(PROP_PREFERRED_HEIGHT)));
     super.setBackground(UIManager.getColor(PROP_COLOR_BACKGROUND));
     super.setFocusable(true);
     super.setDoubleBuffered(true);
@@ -116,6 +131,9 @@ public class MazePanel extends JPanel
   {
     this.maze = maze;
     this.current = maze.getEntance();
+    putClientProperty(PROP_CURRENT_CELL, current);
+    this.direction = DIR_SOUTH;
+    putClientProperty(PROP_DIRECTION, direction);
 
     if(this.maze != null)
     {
@@ -148,24 +166,28 @@ public class MazePanel extends JPanel
       current.setMark(QuadraticMazePainter.MARK_WALKED);
       current = current.getSiblings().get(direction);
       current.setMark(QuadraticMazePainter.MARK_CURRENT);
+      putClientProperty(PROP_CURRENT_CELL, current);
+
       //System.out.println(QuadraticMazePainter.toString(maze));
       repaint();
     }
-    else if(maze.isExit(current) && direction == 2)
+    else if(maze.isExit(current) && direction == DIR_SOUTH)
     {
-      putClientProperty("MazePanel.solved", true);
+      putClientProperty(PROP_SOLVED, true);
     }
   }
 
   private void rotateLeft()
   {
-    direction = (direction + 4 - 1) % 4;
+    direction = (direction + DIR_COUNT - 1) % DIR_COUNT;
+    putClientProperty(PROP_DIRECTION, direction);
     repaint();
   }
 
   private void rotateRight()
   {
-    direction = (direction + 1) % 4;
+    direction = (direction + 1) % DIR_COUNT;
+    putClientProperty(PROP_DIRECTION, direction);
     repaint();
   }
 
@@ -315,7 +337,7 @@ public class MazePanel extends JPanel
       }
 //      ((Graphics2D)g).setPaint(new GradientPaint(
 //          0f, inner[OL].y, Color.RED, 0f, inner[UL].y, Color.BLUE));
-      if(cell.hasWall((direction + 4 - 1) % 4))
+      if(cell.hasWall((direction + DIR_COUNT - 1) % DIR_COUNT))
       {
         //links
         Polygon polygon = new Polygon(
@@ -329,7 +351,7 @@ public class MazePanel extends JPanel
             },
             4);
         g.fillPolygon(polygon);
-        if((isExit && direction == 3) || (isEntrance && direction == 1))
+        if((isExit && direction == DIR_WEST) || (isEntrance && direction == DIR_EAST))
         {
           polygon.xpoints[OL] += (polygon.xpoints[UR] - polygon.xpoints[OL]) * .25;
           polygon.ypoints[OL] += (polygon.ypoints[UL] - polygon.ypoints[OL]) * .33;
@@ -352,7 +374,7 @@ public class MazePanel extends JPanel
       {
         g.fillRect(outer[OL].x, inner[OL].y, wallwidth[X], innerWidth[Y]);
       }
-      if(cell.hasWall((direction + 1) % 4))
+      if(cell.hasWall((direction + 1) % DIR_COUNT))
       {
         //rechts
         Polygon polygon = new Polygon(
@@ -366,7 +388,7 @@ public class MazePanel extends JPanel
             },
             4);
         g.fillPolygon(polygon);
-        if((isExit && direction == 1) || (isEntrance && direction == 3))
+        if((isExit && direction == DIR_EAST) || (isEntrance && direction == DIR_WEST))
         {
           polygon.xpoints[3] += (polygon.xpoints[1] - polygon.xpoints[3]) * .25;
           polygon.ypoints[3] += (polygon.ypoints[2] - polygon.ypoints[3]) * .33;
@@ -392,8 +414,8 @@ public class MazePanel extends JPanel
       if(cell.hasWall(direction))
       {
         g.fillRect(inner[OL].x, inner[OL].y, innerWidth[X], innerWidth[Y]);
-        if((isExit && direction == 2)
-            || (isEntrance && direction == 0))
+        if((isExit && direction == DIR_SOUTH)
+            || (isEntrance && direction == DIR_NORTH))
         {
           Color old = g.getColor();
           g.setColor(UIManager.getColor(
@@ -412,7 +434,7 @@ public class MazePanel extends JPanel
       g.drawLine(outer[UR].x, outer[UR].y, inner[UR].x, inner[UR].y);
       g.drawLine(outer[UL].x, outer[UL].y, inner[UL].x, inner[UL].y);
       g.drawRect(minx + innerDelta[X], miny + innerDelta[Y], innerWidth[X], innerWidth[Y]);
-      if(!cell.hasWall((direction + 4 - 1) % 4))
+      if(!cell.hasWall((direction + DIR_COUNT - 1) % DIR_COUNT))
       {
         g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
         g.drawRect(outer[OL].x, inner[OL].y, wallwidth[X], innerWidth[Y]);
@@ -423,7 +445,7 @@ public class MazePanel extends JPanel
         g.drawLine(outer[OL].x, outer[OL].y, inner[UL].x, inner[UL].y);
         g.drawLine(outer[UL].x, outer[UL].y, inner[OL].x, inner[OL].y);
       }
-      if(!cell.hasWall((direction + 1) % 4))
+      if(!cell.hasWall((direction + 1) % DIR_COUNT))
       {
         g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
         g.drawRect(inner[OR].x, inner[OR].y, wallwidth[X], innerWidth[Y]);

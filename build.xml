@@ -102,6 +102,13 @@
     <available file="${dist.jlink.output}" property="dist.jlink.output.exist"/>
   </target>
   <target name="makeinstall" if="dist.jlink.output.exist">
+    <property name="jlink.launcher.vm.options" value="-Dfile.encoding=UTF-8"/>
+    <replace dir="${dist.jlink.output}/bin">
+      <include name="${jlink.launcher.name}"/>
+      <include name="${jlink.launcher.name}.*"/>
+      <replacetoken><![CDATA[JLINK_VM_OPTIONS=]]></replacetoken>
+      <replacevalue expandproperties="true"><![CDATA[JLINK_VM_OPTIONS=${jlink.launcher.vm.options}]]></replacevalue>
+    </replace>
     <copy todir="${dist.jlink.output}">
       <fileset dir="${basedir}">
         <include name="MazeGenerator.cmd"/>
@@ -116,8 +123,10 @@
     </zip>
   </target>
   <target name="-test-install" if="create-local-install">
-    <delete dir="${basedir}/${application.title}"/>
-    <mkdir dir="${basedir}/${application.title}"/>
-    <unzip src="${dist.dir}/${application.title}.zip" dest="${basedir}/${application.title}"/>
+    <property name="localinstall.dest" location="${application.title}"/>
+    <delete dir="${localinstall.dest}"/>
+    <mkdir dir="${localinstall.dest}"/>
+    <unzip src="${dist.dir}/${application.title}.zip" dest="${localinstall.dest}"/>
+    <copy file="${dist.dir}/${application.title}.zip" todir="${localinstall.dest}"/>
   </target>
 </project>

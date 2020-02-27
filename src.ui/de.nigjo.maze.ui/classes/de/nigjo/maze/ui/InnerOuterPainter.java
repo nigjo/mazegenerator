@@ -29,7 +29,6 @@ import javax.swing.UIManager;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
-import static de.nigjo.maze.ui.MazePanel.*;
 
 /**
  *
@@ -101,7 +100,6 @@ public class InnerOuterPainter implements MazePainter
         innerDelta[Y] - outerDelta[Y]
       };
       boolean isExit = maze.isExit(cell);
-      boolean isEntrance = cell == maze.getEntance();
 
       outer[OL].x = minx + outerDelta[X];
       outer[OL].y = miny + outerDelta[Y];
@@ -148,7 +146,7 @@ public class InnerOuterPainter implements MazePainter
 //      }
 //      ((Graphics2D)g).setPaint(new GradientPaint(
 //          0f, inner[OL].y, Color.RED, 0f, inner[UL].y, Color.BLUE));
-      if(cell.hasWall((direction + DIR_COUNT - 1) % DIR_COUNT))
+      if(cell.hasWall(direction - 1))
       {
         //links
         Polygon polygon = new Polygon(
@@ -162,7 +160,7 @@ public class InnerOuterPainter implements MazePainter
             },
             4);
         g.fillPolygon(polygon);
-        if((isExit && direction == DIR_WEST) || (isEntrance && direction == DIR_EAST))
+        if(MazePainter.isDoor(maze, cell, direction - 1))
         {
           polygon.xpoints[OL] += (polygon.xpoints[UR] - polygon.xpoints[OL]) * .25;
           polygon.ypoints[OL] += (polygon.ypoints[UL] - polygon.ypoints[OL]) * .33;
@@ -185,7 +183,7 @@ public class InnerOuterPainter implements MazePainter
       {
         g.fillRect(outer[OL].x, inner[OL].y, wallwidth[X], innerWidth[Y]);
       }
-      if(cell.hasWall((direction + 1) % DIR_COUNT))
+      if(cell.hasWall(direction + 1))
       {
         //rechts
         Polygon polygon = new Polygon(
@@ -199,7 +197,7 @@ public class InnerOuterPainter implements MazePainter
             },
             4);
         g.fillPolygon(polygon);
-        if((isExit && direction == DIR_EAST) || (isEntrance && direction == DIR_WEST))
+        if(MazePainter.isDoor(maze, cell, direction + 1))
         {
           polygon.xpoints[3] += (polygon.xpoints[1] - polygon.xpoints[3]) * .25;
           polygon.ypoints[3] += (polygon.ypoints[2] - polygon.ypoints[3]) * .33;
@@ -225,8 +223,7 @@ public class InnerOuterPainter implements MazePainter
       if(cell.hasWall(direction))
       {
         g.fillRect(inner[OL].x, inner[OL].y, innerWidth[X], innerWidth[Y]);
-        if((isExit && direction == DIR_SOUTH)
-            || (isEntrance && direction == DIR_NORTH))
+        if(MazePainter.isDoor(maze, cell, direction))
         {
           Color old = g.getColor();
           g.setColor(UIManager.getColor(
@@ -245,7 +242,7 @@ public class InnerOuterPainter implements MazePainter
       g.drawLine(outer[UR].x, outer[UR].y, inner[UR].x, inner[UR].y);
       g.drawLine(outer[UL].x, outer[UL].y, inner[UL].x, inner[UL].y);
       g.drawRect(minx + innerDelta[X], miny + innerDelta[Y], innerWidth[X], innerWidth[Y]);
-      if(!cell.hasWall((direction + DIR_COUNT - 1) % DIR_COUNT))
+      if(!cell.hasWall(direction - 1))
       {
         g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
         g.drawRect(outer[OL].x, inner[OL].y, wallwidth[X], innerWidth[Y]);
@@ -256,7 +253,7 @@ public class InnerOuterPainter implements MazePainter
         g.drawLine(outer[OL].x, outer[OL].y, inner[UL].x, inner[UL].y);
         g.drawLine(outer[UL].x, outer[UL].y, inner[OL].x, inner[OL].y);
       }
-      if(!cell.hasWall((direction + 1) % DIR_COUNT))
+      if(!cell.hasWall(direction + 1))
       {
         g.setColor(UIManager.getColor(PROP_COLOR_WALL_BOUND));
         g.drawRect(inner[OR].x, inner[OR].y, wallwidth[X], innerWidth[Y]);

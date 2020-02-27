@@ -54,6 +54,8 @@ public class MazePanel extends JPanel
   public static final int DIR_SOUTH = 2;
   public static final int DIR_WEST = 3;
 
+  private MazePainter painter;
+
   private int direction;
   private Cell current;
   private Maze maze;
@@ -197,15 +199,19 @@ public class MazePanel extends JPanel
 
   }
 
-  MazePainter painter = new InnerOuterPainter();
+  public void setPainter(MazePainter painter)
+  {
+    this.painter = painter;
+  }
 
   @Override
   protected void paintComponent(Graphics g)
   {
     super.paintComponent(g);
-    Dimension size = getSize();
-
-    painter.paintMaze(maze, current, direction, size, g);
+    if(painter != null)
+    {
+      painter.paintMaze(maze, current, direction, getSize(), g);
+    }
   }
 
 }

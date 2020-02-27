@@ -45,7 +45,9 @@ public class FrameBuilder
         new ImageIcon(FrameBuilder.class.getResource("frameicon64.png")).getImage()
     ));
 
-    frame.getContentPane().add(new MazePanel());
+    MazePanel panel = new MazePanel();
+    panel.setPainter(new InnerOuterPainter());
+    frame.getContentPane().add(panel);
 
     frame.pack();
     frame.setVisible(true);

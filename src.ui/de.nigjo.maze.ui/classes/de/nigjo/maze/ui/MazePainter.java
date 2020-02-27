@@ -60,7 +60,7 @@ public interface MazePainter
     while(ahead.size() < maxView && !sibling.hasWall(direction))
     {
       sibling = sibling.getSiblings().get(direction);
-      ahead.add(0, sibling);
+      ahead.add(sibling);
     }
     return ahead;
   }

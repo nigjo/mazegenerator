@@ -15,6 +15,7 @@
  */
 package de.nigjo.maze.ui;
 
+import java.util.Collections;
 import java.util.List;
 
 import java.awt.Color;
@@ -49,6 +50,7 @@ public class InnerOuterPainter implements MazePainter
       Dimension size, Graphics g)
   {
     List<Cell> view = getViewAhead(current, direction, VIEW_WIDTH);
+    Collections.reverse(view);
 
     int quader[] =
     {

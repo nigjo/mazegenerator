@@ -15,6 +15,9 @@
  */
 package de.nigjo.maze.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -47,6 +50,19 @@ public interface MazePainter
     int green = from.getGreen() + (int)((to.getGreen() - from.getGreen()) * percent);
     int blue = from.getBlue() + (int)((to.getBlue() - from.getBlue()) * percent);
     return new Color(red, green, blue);
+  }
+
+  public default List<Cell> getViewAhead(Cell current, int direction, int maxView)
+  {
+    List<Cell> ahead = new ArrayList<>();
+    ahead.add(current);
+    Cell sibling = current;
+    while(ahead.size() < maxView && !sibling.hasWall(direction))
+    {
+      sibling = sibling.getSiblings().get(direction);
+      ahead.add(0, sibling);
+    }
+    return ahead;
   }
 
   public void paintMaze(Maze maze, Cell current, int direction,

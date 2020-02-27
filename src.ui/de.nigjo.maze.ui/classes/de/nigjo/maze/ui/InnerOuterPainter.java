@@ -15,7 +15,6 @@
  */
 package de.nigjo.maze.ui;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import java.awt.Color;
@@ -49,14 +48,7 @@ public class InnerOuterPainter implements MazePainter
   public void paintMaze(Maze maze, Cell current, int direction,
       Dimension size, Graphics g)
   {
-    List<Cell> ahead = new ArrayList<>();
-    ahead.add(current);
-    Cell sibling = current;
-    while(ahead.size() < VIEW_WIDTH && !sibling.hasWall(direction))
-    {
-      sibling = sibling.getSiblings().get(direction);
-      ahead.add(0, sibling);
-    }
+    List<Cell> view = getViewAhead(current, direction, VIEW_WIDTH);
 
     int quader[] =
     {
@@ -68,7 +60,6 @@ public class InnerOuterPainter implements MazePainter
     double stepWidth = quader[X] / 2. / (stepcount + 1);
     double stepHeight = quader[Y] / 2. / (stepcount + 1);
 
-    List<Cell> view = ahead;
     int pos = view.size();
     Point outer[] = new Point[4];
     Point inner[] = new Point[4];
@@ -280,12 +271,4 @@ public class InnerOuterPainter implements MazePainter
     g.drawRect(minx, miny, quader[X], quader[Y]);
   }
 
-  private void logCell(Cell cell)
-  {
-    System.out.print(cell.hasWall(0) ? '-' : 'O');
-    System.out.print(cell.hasWall(1) ? '-' : 'R');
-    System.out.print(cell.hasWall(2) ? '-' : 'U');
-    System.out.print(cell.hasWall(3) ? '-' : 'L');
-    System.out.println();
-  }
 }

@@ -31,17 +31,22 @@ import de.nigjo.maze.core.Maze;
  */
 public interface MazePainter
 {
-  static final String PREFIX = MazePainter.class.getName();
-  static final String PROP_COLOR_BACKGROUND = PREFIX + ".background";
-  static final String PROP_COLOR_CEILING_FROM = PREFIX + ".ceilingFrom";
-  static final String PROP_COLOR_CEILING_TO = PREFIX + ".ceilingTo";
-  static final String PROP_COLOR_WALL = PREFIX + ".wall";
-  static final String PROP_COLOR_FLOOR_FROM = PREFIX + ".floorFrom";
-  static final String PROP_COLOR_FLOOR_TO = PREFIX + ".floorTo";
-  static final String PROP_COLOR_WALL_CROSS = PREFIX + ".wallCross";
-  static final String PROP_COLOR_WALL_BOUND = PREFIX + ".wallBound";
-  static final String PROP_COLOR_DOOR_ENTRANCE = PREFIX + ".doorEntrance";
-  static final String PROP_COLOR_DOOR_EXIT = PREFIX + ".doorExit";
+  static String PREFIX = MazePainter.class.getName();
+  static String PROP_COLOR_BACKGROUND = PREFIX + ".background";
+  static String PROP_COLOR_CEILING_FROM = PREFIX + ".ceilingFrom";
+  static String PROP_COLOR_CEILING_TO = PREFIX + ".ceilingTo";
+  static String PROP_COLOR_WALL = PREFIX + ".wall";
+  static String PROP_COLOR_FLOOR_FROM = PREFIX + ".floorFrom";
+  static String PROP_COLOR_FLOOR_TO = PREFIX + ".floorTo";
+  static String PROP_COLOR_WALL_CROSS = PREFIX + ".wallCross";
+  static String PROP_COLOR_WALL_BOUND = PREFIX + ".wallBound";
+  static String PROP_COLOR_DOOR_ENTRANCE = PREFIX + ".doorEntrance";
+  static String PROP_COLOR_DOOR_EXIT = PREFIX + ".doorExit";
+
+  static int DIR_NORTH = 0;
+  static int DIR_EAST = 1;
+  static int DIR_SOUTH = 2;
+  static int DIR_WEST = 3;
 
   public static Color getColor(Color from, Color to, int pos, int max)
   {
@@ -63,6 +68,12 @@ public interface MazePainter
       ahead.add(sibling);
     }
     return ahead;
+  }
+
+  static boolean isDoor(Maze maze, Cell current, int wallDirection)
+  {
+    return (maze.isExit(current) && current.norm(wallDirection) == DIR_SOUTH)
+        || (maze.getEntance() == current && current.norm(wallDirection) == DIR_NORTH);
   }
 
   public void paintMaze(Maze maze, Cell current, int direction,

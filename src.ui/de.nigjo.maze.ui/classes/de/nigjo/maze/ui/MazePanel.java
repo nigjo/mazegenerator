@@ -48,12 +48,6 @@ public class MazePanel extends JPanel
       MazePanel.class.getName() + ".current_cell";
   public static final String PROP_SOLVED = MazePanel.class.getName() + ".solved";
 
-  public static final int DIR_COUNT = 4;
-  public static final int DIR_NORTH = 0;
-  public static final int DIR_EAST = 1;
-  public static final int DIR_SOUTH = 2;
-  public static final int DIR_WEST = 3;
-
   private MazePainter painter;
 
   private int direction;
@@ -130,7 +124,7 @@ public class MazePanel extends JPanel
     this.maze = maze;
     this.current = maze.getEntance();
     putClientProperty(PROP_CURRENT_CELL, current);
-    this.direction = DIR_SOUTH;
+    this.direction = MazePainter.DIR_SOUTH;
     putClientProperty(PROP_DIRECTION, direction);
 
     if(this.maze != null)
@@ -169,7 +163,7 @@ public class MazePanel extends JPanel
       //System.out.println(QuadraticMazePainter.toString(maze));
       repaint();
     }
-    else if(maze.isExit(current) && direction == DIR_SOUTH)
+    else if(maze.isExit(current) && direction == MazePainter.DIR_SOUTH)
     {
       putClientProperty(PROP_SOLVED, true);
     }
@@ -177,14 +171,14 @@ public class MazePanel extends JPanel
 
   private void rotateLeft()
   {
-    direction = (direction + DIR_COUNT - 1) % DIR_COUNT;
+    direction = current.norm(direction - 1);
     putClientProperty(PROP_DIRECTION, direction);
     repaint();
   }
 
   private void rotateRight()
   {
-    direction = (direction + 1) % DIR_COUNT;
+    direction = current.norm(direction + 1);
     putClientProperty(PROP_DIRECTION, direction);
     repaint();
   }

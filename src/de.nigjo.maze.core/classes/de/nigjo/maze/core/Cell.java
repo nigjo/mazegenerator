@@ -38,7 +38,12 @@ public class Cell
 
   public boolean hasWall(int index)
   {
-    return walls[index];
+    return walls[norm(index)];
+  }
+
+  public int norm(int index)
+  {
+    return (index + walls.length) % walls.length;
   }
 
   public void setSiblings(Cell... siblings)
@@ -52,8 +57,8 @@ public class Cell
 
   public void addWall(int index)
   {
-    this.setWall(index, true);
-    this.siblings[index].setWall(this.siblings[index].indexOf(this), true);
+    this.setWall(norm(index), true);
+    this.siblings[norm(index)].setWall(this.siblings[norm(index)].indexOf(this), true);
   }
 
   public void removeWall(Cell sibling)
@@ -63,13 +68,13 @@ public class Cell
 
   public void removeWall(int index)
   {
-    this.setWall(index, false);
-    this.siblings[index].setWall(this.siblings[index].indexOf(this), false);
+    this.setWall(norm(index), false);
+    this.siblings[norm(index)].setWall(this.siblings[norm(index)].indexOf(this), false);
   }
 
   private void setWall(int index, boolean wall)
   {
-    this.walls[index] = wall;
+    this.walls[norm(index)] = wall;
   }
 
   private int indexOf(Cell other)

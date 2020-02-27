@@ -88,6 +88,13 @@ public class MazePanel extends JPanel
         UIManager.getInt(PROP_PREFERRED_WIDTH),
         UIManager.getInt(PROP_PREFERRED_HEIGHT)));
     super.setBackground(UIManager.getColor(PROP_COLOR_BACKGROUND));
+    UIManager.getDefaults().addPropertyChangeListener(pce ->
+    {
+      if(PROP_COLOR_BACKGROUND.equals(pce.getPropertyName()))
+      {
+        super.setBackground((Color)pce.getNewValue());
+      }
+    });
     super.setFocusable(true);
     super.setDoubleBuffered(true);
   }

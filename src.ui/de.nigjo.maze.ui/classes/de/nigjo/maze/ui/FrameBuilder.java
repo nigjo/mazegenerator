@@ -18,6 +18,7 @@ package de.nigjo.maze.ui;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.ServiceLoader;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -46,7 +47,10 @@ public class FrameBuilder
     ));
 
     MazePanel panel = new MazePanel();
-    panel.setPainter(new InnerOuterPainter());
+
+    ServiceLoader<MazePainter> painters = ServiceLoader.load(MazePainter.class);
+    painters.findFirst()
+        .ifPresent(panel::setPainter);
     frame.getContentPane().add(panel);
 
     frame.pack();

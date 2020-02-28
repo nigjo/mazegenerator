@@ -16,12 +16,15 @@
 package de.nigjo.maze.ui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -102,10 +105,15 @@ public class MazePanel extends JPanel
     inputMap.put(getKeyStroke(KeyEvent.VK_UP, 0), "moveForward");
     inputMap.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "rotateLeft");
     inputMap.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "rotateRight");
+    inputMap.put(getKeyStroke(KeyEvent.VK_F1, 0), "toggleMap");
+    //inputMap.put(getKeyStroke(KeyEvent.VK_F2, 0), "togglePainter");
+
     ActionMap actionMap = getActionMap();
-    actionMap.put("moveForward", new MoveAction(this::moveForward));
-    actionMap.put("rotateLeft", new MoveAction(this::rotateLeft));
-    actionMap.put("rotateRight", new MoveAction(this::rotateRight));
+    actionMap.put("moveForward", new PanelAction(this::moveForward));
+    actionMap.put("rotateLeft", new PanelAction(this::rotateLeft));
+    actionMap.put("rotateRight", new PanelAction(this::rotateRight));
+    actionMap.put("toggleMap", new PanelAction(this::toggleMap));
+//    actionMap.put("togglePainter", new PanelAction(this::togglePainter));
 
     requestFocusInWindow();
   }
@@ -183,11 +191,11 @@ public class MazePanel extends JPanel
     repaint();
   }
 
-  private static class MoveAction extends AbstractAction
+  private static class PanelAction extends AbstractAction
   {
     private final Runnable runner;
 
-    public MoveAction(Runnable runner)
+    public PanelAction(Runnable runner)
     {
       this.runner = runner;
     }
@@ -211,8 +219,21 @@ public class MazePanel extends JPanel
     super.paintComponent(g);
     if(painter != null)
     {
+      AffineTransform transform = ((Graphics2D)g).getTransform();
       painter.paintMaze(maze, current, direction, getSize(), g);
+      ((Graphics2D)g).setTransform(transform);
     }
   }
 
+  private void toggleMap()
+  {
+    for(Component component : getComponents())
+    {
+      if(component instanceof WalkedHint)
+      {
+        component.setVisible(!component.isVisible());
+        break;
+      }
+    }
+  }
 }

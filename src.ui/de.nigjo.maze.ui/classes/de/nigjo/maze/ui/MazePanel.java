@@ -15,6 +15,8 @@
  */
 package de.nigjo.maze.ui;
 
+import java.util.ServiceLoader;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -106,14 +108,14 @@ public class MazePanel extends JPanel
     inputMap.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "rotateLeft");
     inputMap.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "rotateRight");
     inputMap.put(getKeyStroke(KeyEvent.VK_F1, 0), "toggleMap");
-    //inputMap.put(getKeyStroke(KeyEvent.VK_F2, 0), "togglePainter");
+    inputMap.put(getKeyStroke(KeyEvent.VK_F2, 0), "togglePainter");
 
     ActionMap actionMap = getActionMap();
     actionMap.put("moveForward", new PanelAction(this::moveForward));
     actionMap.put("rotateLeft", new PanelAction(this::rotateLeft));
     actionMap.put("rotateRight", new PanelAction(this::rotateRight));
     actionMap.put("toggleMap", new PanelAction(this::toggleMap));
-//    actionMap.put("togglePainter", new PanelAction(this::togglePainter));
+    actionMap.put("togglePainter", new PanelAction(this::togglePainter));
 
     requestFocusInWindow();
   }
@@ -210,7 +212,12 @@ public class MazePanel extends JPanel
 
   public void setPainter(MazePainter painter)
   {
+    if(this.painter != null)
+    {
+      this.painter.reset();
+    }
     this.painter = painter;
+    this.painter.init();
   }
 
   @Override
@@ -234,6 +241,39 @@ public class MazePanel extends JPanel
         component.setVisible(!component.isVisible());
         break;
       }
+    }
+  }
+
+  private void setNewPainter()
+  {
+  }
+
+  private void togglePainter()
+  {
+    ServiceLoader<MazePainter> painters = ServiceLoader.load(MazePainter.class);
+    MazePainter first = null;
+    boolean found = false;
+    for(MazePainter painterImpl : painters)
+    {
+      if(first == null)
+      {
+        first = painterImpl;
+      }
+      if(found)
+      {
+        setPainter(painterImpl);
+        repaint();
+        return;
+      }
+      else if(painter.getClass().isInstance(painterImpl))
+      {
+        found = true;
+      }
+    }
+    if(found)
+    {
+      setPainter(first);
+      repaint();
     }
   }
 }

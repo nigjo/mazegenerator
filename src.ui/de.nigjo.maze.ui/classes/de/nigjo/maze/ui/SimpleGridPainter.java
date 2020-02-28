@@ -15,13 +15,16 @@
  */
 package de.nigjo.maze.ui;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import de.nigjo.maze.core.Cell;
@@ -35,9 +38,25 @@ public class SimpleGridPainter implements MazePainter
 {
   public SimpleGridPainter()
   {
-    UIManager.getDefaults().put(PROP_COLOR_BACKGROUND, Color.WHITE);
-    UIManager.getDefaults().put(PROP_COLOR_WALL_BOUND, Color.BLACK);
-    UIManager.getDefaults().put(WalkedHint.PROP_COLOR_WALL, Color.YELLOW);
+  }
+  Map<String, Color> defaultColors = new HashMap<>();
+
+  @Override
+  public void init()
+  {
+    UIDefaults defaults = UIManager.getDefaults();
+    defaultColors.put(PROP_COLOR_BACKGROUND,
+        (Color)defaults.put(PROP_COLOR_BACKGROUND, Color.WHITE));
+    defaultColors.put(PROP_COLOR_WALL_BOUND,
+        (Color)defaults.put(PROP_COLOR_WALL_BOUND, Color.BLACK));
+    defaultColors.put(WalkedHint.PROP_COLOR_WALL,
+        (Color)defaults.put(WalkedHint.PROP_COLOR_WALL, Color.CYAN));
+  }
+
+  @Override
+  public void reset()
+  {
+    defaultColors.forEach((k, c) -> UIManager.getDefaults().put(k, c));
   }
 
   @Override

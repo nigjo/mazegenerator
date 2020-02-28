@@ -76,6 +76,14 @@ public interface MazePainter
         || (maze.getEntance() == current && current.norm(wallDirection) == DIR_NORTH);
   }
 
+  public default void init()
+  {
+  }
+
+  public default void reset()
+  {
+  }
+
   public void paintMaze(Maze maze, Cell current, int direction,
       Dimension size, Graphics g);
 

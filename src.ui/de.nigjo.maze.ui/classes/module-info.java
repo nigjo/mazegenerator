@@ -21,5 +21,8 @@ module de.nigjo.maze.ui
   uses de.nigjo.maze.core.MazeGenerator;
   uses de.nigjo.maze.ui.MazePainter;
 
-  provides de.nigjo.maze.ui.MazePainter with de.nigjo.maze.ui.InnerOuterPainter;
+  provides de.nigjo.maze.ui.MazePainter
+      with de.nigjo.maze.ui.InnerOuterPainter,
+      de.nigjo.maze.ui.SimpleGridPainter,
+      de.nigjo.maze.ui.CenteredViewBoxPainter;
 }

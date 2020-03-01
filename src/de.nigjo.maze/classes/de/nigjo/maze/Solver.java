@@ -27,9 +27,9 @@ import de.nigjo.maze.core.Maze;
  */
 class Solver
 {
-  static int MARK_NEVER = 0;
-  static int MARK_WALK = 1;
-  static int MARK_DEADEND = 2;
+  static int MARK_NEVER = Cell.MARK_UNKNOWN;
+  static int MARK_WALK = Cell.MARK_WALKED;
+  static int MARK_DEADEND = 903;
 
   static int solve(Maze generated)
   {

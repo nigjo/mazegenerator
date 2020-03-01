@@ -17,16 +17,16 @@ package de.nigjo.maze.core;
 
 import java.util.List;
 
+import static de.nigjo.maze.core.Cell.MARK_CURRENT;
+import static de.nigjo.maze.core.Cell.MARK_WALKED;
+
 /**
  *
  * @author nigjo
  */
 public class QuadraticMazePainter
 {
-  public static final int MARK_WAY = 0;
-  public static final int MARK_WALKED = 1;
-  public static final int MARK_DEADEND = 2;
-  public static final int MARK_CURRENT = 3;
+  public static final int MARK_DEADEND = 903;
 
   private static final char WAY = '·';
   private static final char DEADEND = '·';//'◦';

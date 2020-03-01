@@ -38,8 +38,6 @@ import javax.swing.UIManager;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
-import de.nigjo.maze.core.QuadraticMazePainter;
-import static de.nigjo.maze.ui.MazePainter.PROP_COLOR_BACKGROUND;
 
 /**
  * A Panel to paint and walk a Maze.
@@ -86,10 +84,10 @@ public class MazePanel extends JPanel
     super.setPreferredSize(new java.awt.Dimension(
         UIManager.getInt(PROP_PREFERRED_WIDTH),
         UIManager.getInt(PROP_PREFERRED_HEIGHT)));
-    super.setBackground(UIManager.getColor(PROP_COLOR_BACKGROUND));
+    super.setBackground(UIManager.getColor(MazePainter.PROP_COLOR_BACKGROUND));
     UIManager.getDefaults().addPropertyChangeListener(pce ->
     {
-      if(PROP_COLOR_BACKGROUND.equals(pce.getPropertyName()))
+      if(MazePainter.PROP_COLOR_BACKGROUND.equals(pce.getPropertyName()))
       {
         super.setBackground((Color)pce.getNewValue());
       }
@@ -165,9 +163,9 @@ public class MazePanel extends JPanel
   {
     if(!current.hasWall(this.direction))
     {
-      current.setMark(QuadraticMazePainter.MARK_WALKED);
+      current.setMark(Cell.MARK_WALKED);
       current = current.getSiblings().get(direction);
-      current.setMark(QuadraticMazePainter.MARK_CURRENT);
+      current.setMark(Cell.MARK_CURRENT);
       putClientProperty(PROP_CURRENT_CELL, current);
 
       //System.out.println(QuadraticMazePainter.toString(maze));

@@ -26,7 +26,6 @@ import javax.swing.UIManager;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
-import de.nigjo.maze.core.QuadraticMazePainter;
 
 /**
  * Paints the walked cells
@@ -83,13 +82,13 @@ public class WalkedHint extends JComponent
     int col = 0;
     for(Cell cell : cells)
     {
-      if(cell.getMark() == QuadraticMazePainter.MARK_CURRENT)
+      if(cell.getMark() == Cell.MARK_CURRENT)
       {
         g.setColor(UIManager.getColor(PROP_COLOR_CURRENT));
         g.fillRect(col * 4 + 1, row * 4 + 1, 4, 4);
         g.setColor(UIManager.getColor(PROP_COLOR_WALL));
       }
-      else if(cell.getMark() != QuadraticMazePainter.MARK_WALKED)
+      else if(cell.getMark() != Cell.MARK_WALKED)
       {
         //g.setColor(UIManager.getColor(PROP_COLOR_CURRENT));
         g.fillRect(col * 4 + 1, row * 4 + 1, 4, 4);

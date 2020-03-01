@@ -25,6 +25,10 @@ import java.util.List;
  */
 public class Cell
 {
+  public static final int MARK_UNKNOWN = 0;
+  public static final int MARK_WALKED = 1;
+  public static final int MARK_CURRENT = 2;
+
   private int mark;
   private final boolean walls[];
   private Cell siblings[];

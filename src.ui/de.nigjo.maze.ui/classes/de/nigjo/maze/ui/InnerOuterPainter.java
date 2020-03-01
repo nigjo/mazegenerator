@@ -130,7 +130,7 @@ public class InnerOuterPainter implements MazePainter
       g.setColor(MazePainter.getColor(UIManager.getColor(PROP_COLOR_FLOOR_FROM),
           UIManager.getColor(PROP_COLOR_FLOOR_TO), cRow, maze.getWidth()));
       g.fillRect(outer[UL].x, inner[UL].y, outerWidth[X], wallwidth[Y]);
-      if(cell.getMark() == 1)
+      if(cell.getMark() == Cell.MARK_WALKED)
       {
         g.setColor(g.getColor().darker());
         int dotW = (inner[UR].x - inner[UL].x) / 2;

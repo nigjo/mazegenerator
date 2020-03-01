@@ -75,6 +75,26 @@ public class CenteredViewBoxPainter implements MazePainter
 
       g2.setColor(unten);
       g.fillRect(-boxwidth / 2, boxheight / 2 - stepheight, boxwidth, stepheight);
+
+      if(cell.getMark() == Cell.MARK_WALKED)
+      {
+        Polygon floor = new Polygon();
+        int insetY = (int)(stepheight * .2);
+        int insetXn = (int)(boxwidth * .15);
+        int insetXd = (int)((boxwidth - 2 * stepwidth) * .1);
+        //"near" line
+        floor.addPoint(-boxwidth / 2 + insetXn, boxheight / 2 - insetY - 1);
+        floor.addPoint(boxwidth / 2 - insetXn, boxheight / 2 - insetY - 1);
+        //"distant" line
+        floor.addPoint(boxwidth / 2 - stepwidth - insetXd,
+            boxheight / 2 - stepheight + insetY - 1);
+        floor.addPoint(-boxwidth / 2 + stepwidth + insetXd,
+            boxheight / 2 - stepheight + insetY - 1);
+        //g.setColor(unten.darker());
+        g.setColor(unten.brighter());
+        g.fillPolygon(floor);
+        g.setColor(unten);
+      }
       unten = g.getColor().darker();
 
       g.setColor(wand);
@@ -167,6 +187,7 @@ public class CenteredViewBoxPainter implements MazePainter
 //      g.setClip(clip);
       g.setColor(line);
       g.drawRect(-boxwidth / 2, -boxheight / 2, boxwidth - 1, boxheight - 1);
+
       boxwidth -= stepwidth * 2;
       boxheight -= stepheight * 2;
     }

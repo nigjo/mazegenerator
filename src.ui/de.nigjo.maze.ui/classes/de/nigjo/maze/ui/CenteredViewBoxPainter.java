@@ -21,6 +21,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.UIManager;
 
@@ -78,22 +79,23 @@ public class CenteredViewBoxPainter implements MazePainter
 
       if(cell.getMark() == Cell.MARK_WALKED)
       {
+        AffineTransform old = g2.getTransform();
+        g.translate(0, boxheight / 2 - stepheight / 2);
+        int deltax = boxwidth - stepwidth;
+        int deltay = stepheight;
         Polygon floor = new Polygon();
-        int insetY = (int)(stepheight * .2);
-        int insetXn = (int)(boxwidth * .15);
-        int insetXd = (int)((boxwidth - 2 * stepwidth) * .1);
         //"near" line
-        floor.addPoint(-boxwidth / 2 + insetXn, boxheight / 2 - insetY - 1);
-        floor.addPoint(boxwidth / 2 - insetXn, boxheight / 2 - insetY - 1);
+        floor.addPoint(-boxwidth / 2 + deltax / 4, stepheight / 2 - deltay / 4);
+        floor.addPoint(boxwidth / 2 - deltax / 4, stepheight / 2 - deltay / 4);
         //"distant" line
-        floor.addPoint(boxwidth / 2 - stepwidth - insetXd,
-            boxheight / 2 - stepheight + insetY - 1);
-        floor.addPoint(-boxwidth / 2 + stepwidth + insetXd,
-            boxheight / 2 - stepheight + insetY - 1);
-        //g.setColor(unten.darker());
+        floor.addPoint(boxwidth / 2 - stepwidth - deltax / 8,
+            -stepheight / 2 + deltay / 8);
+        floor.addPoint(-boxwidth / 2 + stepwidth + deltax / 8,
+            -stepheight / 2 + deltay / 8);
         g.setColor(unten.brighter());
         g.fillPolygon(floor);
         g.setColor(unten);
+        g2.setTransform(old);
       }
       unten = g.getColor().darker();
 

@@ -73,33 +73,46 @@ public class SimpleGridPainter implements MazePainter
     {
       Rectangle in = out.getBounds();
       in.grow((int)(out.width * -.15), (int)(out.height * -.15));
+      int stepWidth = in.x - out.x;
+
       g.drawRect(in.x, in.y, in.width, in.height);
 
       if(!cell.hasWall(direction - 1))
       {
-        g.drawRect(out.x, in.y, in.x - out.x, in.height);
+        g.drawRect(out.x, in.y, stepWidth, in.height);
       }
       else if(MazePainter.isDoor(maze, cell, direction - 1))
       {
-        g.drawOval(out.x + (int)((in.x - out.x) * .1), in.y,
-            in.x - out.x - (int)((in.x - out.x) * .2), in.height);
+        g.drawOval(out.x + (int)((stepWidth) * .1), in.y,
+            stepWidth - (int)((stepWidth) * .2), in.height);
       }
       if(!cell.hasWall(direction + 1))
       {
-        g.drawRect(in.x + in.width, in.y, in.x - out.x, in.height);
+        g.drawRect(in.x + in.width, in.y, stepWidth, in.height);
       }
       else if(MazePainter.isDoor(maze, cell, direction + 1))
       {
-        g.drawOval(in.x + in.width + (int)((in.x - out.x) * .1), in.y,
-            in.x - out.x - (int)((in.x - out.x) * .2), in.height);
+        g.drawOval(in.x + in.width + (int)((stepWidth) * .1), in.y,
+            stepWidth - (int)((stepWidth) * .2), in.height);
       }
 
       if(MazePainter.isDoor(maze, cell, direction))
       {
-        g.drawOval(in.x + (int)((in.x - out.x) * .25),
-            in.y + (int)((out.height - in.height) * .25),
-            in.width - (int)((in.x - out.x) * .5),
-            in.height - (int)((out.height - in.height) * .5));
+        int doorHeight = out.height - in.height;
+        g.drawOval(in.x + (int)((stepWidth) * .25),
+            in.y + (int)((doorHeight) * .25),
+            in.width - (int)((stepWidth) * .5),
+            in.height - (int)((doorHeight) * .5));
+      }
+
+      if(cell.getMark() == Cell.MARK_WALKED)
+      {
+        int stepHeight = in.y - out.y;
+        int min = (stepHeight < in.width ? stepHeight : in.width) / 2;
+        int x = in.x + (in.width - min) / 2;
+        int y = in.y + in.height + (stepHeight - min) / 2;
+        g.drawLine(x, y, x + min, y + min);
+        g.drawLine(x + min, y, x, y + min);
       }
 
       out = in;

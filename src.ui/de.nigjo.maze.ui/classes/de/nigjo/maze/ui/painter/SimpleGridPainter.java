@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.nigjo.maze.ui;
+package de.nigjo.maze.ui.painter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +29,8 @@ import javax.swing.UIManager;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
+import de.nigjo.maze.ui.MazePainter;
+import de.nigjo.maze.ui.WalkedHint;
 
 /**
  *

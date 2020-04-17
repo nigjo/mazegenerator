@@ -16,6 +16,7 @@
 package de.nigjo.maze.core;
 
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.function.IntFunction;
 
 /**
@@ -64,4 +65,21 @@ public interface MazeGenerator
     return cells;
   }
 
+  public static MazeGenerator getGenerator()
+  {
+    ServiceLoader<MazeGenerator> services = ServiceLoader.load(MazeGenerator.class);
+    return services.findFirst()
+        .orElse(null);
+  }
+
+  public static MazeGenerator getGenerator(String name)
+  {
+    ServiceLoader<MazeGenerator> services = ServiceLoader.load(MazeGenerator.class);
+    return services.stream()
+        .map(ServiceLoader.Provider::get)
+        .filter(gen -> gen.getClass().getSimpleName()
+        .toLowerCase().contains(name.toLowerCase()))
+        .findFirst()
+        .orElse(null);
+  }
 }

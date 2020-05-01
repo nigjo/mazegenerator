@@ -15,7 +15,10 @@
  */
 package de.nigjo.maze.core;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static de.nigjo.maze.core.Cell.MARK_CURRENT;
 import static de.nigjo.maze.core.Cell.MARK_WALKED;
@@ -35,6 +38,16 @@ public class QuadraticMazePainter
 
   public static String toString(Maze maze)
   {
+    return toString(maze, WAY, Collections.emptyMap());
+  }
+
+  public static String toString(Maze maze,
+      char way, Map<Integer, Character> states)
+  {
+    Map<Integer, Character> usedStates = new HashMap<>(states);
+    usedStates.putIfAbsent(MARK_CURRENT, NOW);
+    usedStates.putIfAbsent(MARK_WALKED, WALKED);
+    usedStates.putIfAbsent(MARK_DEADEND, DEADEND);
     List<Cell> cells = (List<Cell>)maze.getCells();
     if(cells == null || cells.isEmpty())
     {
@@ -49,6 +62,9 @@ public class QuadraticMazePainter
     }
     int height = maze.getHeight();
 
+    char wayChar = way;
+    char walkedChar = usedStates.getOrDefault(MARK_WALKED, WALKED);
+
     for(int row = 0; row < height; row++)
     {
       b.append("\n│");
@@ -58,22 +74,18 @@ public class QuadraticMazePainter
       for(int col = 0; col < width; col++)
       {
         Cell c = cells.get(row * width + col);
-        char mark =
-            c.getMark() == MARK_CURRENT ? NOW
-            : c.getMark() == MARK_WALKED ? WALKED
-            : c.getMark() == 2 ? DEADEND
-            : WAY;
+        char mark = usedStates.getOrDefault(c.getMark(), way);
         b.append(' ').append(mark).append(' ');
-        char waypoint = WAY;
-        if(mark == WALKED && !c.hasWall(1) && c.getSiblings().get(1).getMark() == 1)
+        char waypoint = wayChar;
+        if(mark == walkedChar && !c.hasWall(1) && c.getSiblings().get(1).getMark() == 1)
         {
-          waypoint = WALKED;
+          waypoint = walkedChar;
         }
         b.append(c.hasWall(1) ? '│' : waypoint);
-        waypoint = WAY;
-        if(mark == WALKED && !c.hasWall(2) && c.getSiblings().get(2).getMark() == 1)
+        waypoint = wayChar;
+        if(mark == walkedChar && !c.hasWall(2) && c.getSiblings().get(2).getMark() == 1)
         {
-          waypoint = WALKED;
+          waypoint = walkedChar;
         }
         line//.append("-")
             .append(maze.isExit(c) ? "─E─" : (c.hasWall(2) ? "───"

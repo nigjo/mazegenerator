@@ -17,6 +17,6 @@ call bin\MazeGenerator.bat %MAZE_WIDTH% %MAZE_HEIGHT% "%MAZE_SEED%"
 ) else (
 echo "%MAZE_SEED%"
 call bin\MazeGenerator.bat %MAZE_WIDTH% %MAZE_HEIGHT% "%MAZE_SEED%"
-)>>~n0.log
+)>>%~n0.log
 
 if not "%~1" == "auto" pause

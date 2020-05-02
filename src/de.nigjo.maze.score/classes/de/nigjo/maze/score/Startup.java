@@ -16,13 +16,12 @@
 package de.nigjo.maze.score;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.ServiceLoader;
+import java.util.TreeMap;
 
-import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
 import de.nigjo.maze.core.QuadraticMazePainter;
@@ -39,7 +38,29 @@ public class Startup
     int height = Integer.parseInt(args[1]);
     int count = Integer.parseInt(args[2]);
 
-    String argHash = args.length > 3 ? args[3] : null;
+    List<MazeInfo> mazes = generateMazes(
+        args.length > 3 ? args[3] : null, count, width, height);
+
+    Map<Map<String, Number>, MazeInfo> scores = findScores(mazes);
+
+    printMazes(scores);
+  }
+
+  private static Map<Map<String, Number>, MazeInfo> findScores(List<MazeInfo> mazes)
+  {
+    Map<Map<String, Number>, MazeInfo> scores = new TreeMap<>(Startup::sortByScore);
+    Scorer scorer = new StartEndScorer();
+    for(MazeInfo info : mazes)
+    {
+      Map<String, Number> scoreData = scorer.getScores(info);
+      scores.put(scoreData, info);
+    }
+    return scores;
+  }
+
+  private static List<MazeInfo> generateMazes(
+      String argHash, int count, int width, int height)
+  {
     long seed;
     if(argHash != null)
     {
@@ -64,20 +85,7 @@ public class Startup
     MazeGenerator generator = getGenerator("kruskal");
 
     Random rnd = new Random(seed);
-
-    class MazeInfo
-    {
-      Maze maze;
-      long seed;
-      String hash;
-      int startCount;
-      int endCount;
-      int length;
-      int level;
-    }
-
     List<MazeInfo> mazes = new ArrayList<>();
-
     for(int i = 0; i < count; i++)
     {
       MazeInfo info = new MazeInfo();
@@ -96,131 +104,69 @@ public class Startup
 
       info.length = Solver.solve(maze);
 
-      Map<Cell, Integer> startDistance = new HashMap<>();
-      Map<Cell, Integer> endDistance = new HashMap<>();
-
-      Cell exit = findDistance(maze, maze.getEntance(), startDistance);
-      findDistance(maze, exit, endDistance);
-
-      info.startCount = 0;
-      info.endCount = 0;
-      //TODO: Markierungen setzen
-      for(Cell cell : maze.getCells())
-      {
-        int start = startDistance.get(cell);
-        int ende = endDistance.get(cell);
-        if(cell.getMark() != Cell.MARK_WALKED)
-        {
-          if(start > ende)
-          {
-            cell.setMark(200);
-            info.endCount++;
-          }
-          else
-          {
-            cell.setMark(100);
-            info.startCount++;
-          }
-        }
-      }
-
-      double sum = (info.length + info.startCount + info.endCount) / 100.;
-
-      if(info.endCount / sum > 66 || info.length < (info.maze.getHeight() * 1.5))
-      {
-        info.level = 1;
-      }
-      else if(info.endCount > info.startCount)
-      {
-        info.level = 2;
-      }
-      else if(info.length / sum > 30)
-      {
-        info.level = 6;
-      }
-      else if(info.length / sum > 25)
-      {
-        info.level = 5;
-      }
-      else if(info.startCount > info.endCount)
-      {
-        info.level = 3;
-      }
-      else
-      {
-        info.level = 4;
-      }
-
       mazes.add(info);
     }
+    return mazes;
+  }
 
-    mazes.sort((i1, i2) ->
+  private static int sortByScore(Map<String, Number> m1, Map<String, Number> m2)
+  {
+    double delta = m1.getOrDefault("score", 0.).doubleValue()
+        - m2.getOrDefault("score", 0.).doubleValue();
+
+    return delta < 0 ? -1 : (delta > 0 ? 1 : 0);
+  }
+
+  private static int sortWithScoreFirst(String m1, String m2)
+  {
+    if("score".equals(m1))
     {
-      int delta = i1.startCount - i2.startCount;
-      if(delta != 0)
-      {
-        return delta;
-      }
-
-      delta = i1.length - i2.length;
-      if(delta == 0)
-      {
-        return i1.endCount - i2.endCount;
-      }
-      return delta;
-    });
-
-    for(MazeInfo info : mazes)
+      return -1;
+    }
+    if("score".equals(m2))
     {
-      double sum = (info.length + info.startCount + info.endCount) / 100.;
+      return 1;
+    }
+    return m1.compareToIgnoreCase(m2);
+  }
+
+  private static void printMazes(Map<Map<String, Number>, MazeInfo> scores)
+  {
+    List<MazeInfo> sorted = new ArrayList<>(scores.values());
+    for(Map.Entry<Map<String, Number>, MazeInfo> item : scores.entrySet())
+    {
+      MazeInfo info = item.getValue();
       String levelView =
           QuadraticMazePainter.toString(info.maze, '·', Map.of(
               100, '+', 200, '-'
           ));
-      System.out.println(levelView);
-      System.out.println(info.hash);
-      System.out.println(String.format("id-%03d", mazes.indexOf(info) + 1)
-          + ", path: " + String.format("%4.1f%%", info.length / sum)
-          + ", start: " + String.format("%4.1f%%", info.startCount / sum)
-          + ", end: " + String.format("%4.1f%%", info.endCount / sum)
-          + ", lvl?: " + String.format("%2d", info.level)
-      );
-      //System.out.println("Level " + info.level+"?");
-    }
-  }
+      Map<String, Number> scoreData = new TreeMap<>(Startup::sortWithScoreFirst);
 
-  private static Cell findDistance(Maze maze, Cell entance,
-      Map<Cell, Integer> distances)
-  {
-    Cell exitCell = null;
-    List<Cell> stack = new ArrayList<>();
-    stack.add(entance);
-    distances.put(entance, 0);
-
-    while(!stack.isEmpty())
-    {
-      Cell current = stack.remove(0);
-      if(exitCell == null && maze.isExit(current))
+      scoreData.putAll(item.getKey());
+      StringBuilder data = new StringBuilder();
+      data.append(String.format("id-%03d", sorted.indexOf(info) + 1));
+      for(Map.Entry<String, Number> entry : scoreData.entrySet())
       {
-        exitCell = current;
-      }
-      Integer distance = distances.get(current);
-      List<Cell> siblings = current.getSiblings();
-      for(int sIdx = 0; sIdx < siblings.size(); sIdx++)
-      {
-        //Cell get = current.getSiblings().get(sIdx);
-        if(!current.hasWall(sIdx))
+        data.append(", ")
+            .append(entry.getKey())
+            .append(": ");
+        Number num = entry.getValue();
+        if(num instanceof Integer
+            || num instanceof Long
+            || num instanceof Short)
         {
-          Integer sibDist = distances.putIfAbsent(siblings.get(sIdx), distance + 1);
-          if(sibDist == null)
-          {
-            stack.add(siblings.get(sIdx));
-          }
+          data.append(num);
+        }
+        else
+        {
+          data.append(String.format("%4.1f", num));
         }
       }
-    }
 
-    return exitCell;
+      System.out.println(levelView);
+      System.out.println(info.hash);
+      System.out.println(data);
+    }
   }
 
   public static MazeGenerator getGenerator(String name)

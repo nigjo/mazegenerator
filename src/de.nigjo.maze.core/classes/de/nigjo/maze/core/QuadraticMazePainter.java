@@ -15,7 +15,6 @@
  */
 package de.nigjo.maze.core;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,11 @@ import static de.nigjo.maze.core.Cell.MARK_WALKED;
  */
 public class QuadraticMazePainter
 {
+  public static final int DIR_TOP = 0;
+  public static final int DIR_RIGHT = 1;
+  public static final int DIR_BOTTOM = 2;
+  public static final int DIR_LEFT = 3;
+
   public static final int MARK_DEADEND = 903;
 
   private static final char WAY = '·';
@@ -45,7 +49,7 @@ public class QuadraticMazePainter
       char way, Map<Integer, Character> states)
   {
     Map<Integer, Character> usedStates =
-        states == null ? Collections.emptyMap() : new HashMap<>(states);
+        states == null ? new HashMap<>() : new HashMap<>(states);
     usedStates.putIfAbsent(MARK_CURRENT, NOW);
     usedStates.putIfAbsent(MARK_WALKED, WALKED);
     usedStates.putIfAbsent(MARK_DEADEND, DEADEND);
@@ -78,13 +82,15 @@ public class QuadraticMazePainter
         char mark = usedStates.getOrDefault(c.getMark(), way);
         b.append(' ').append(mark).append(' ');
         char waypoint = wayChar;
-        if(mark == walkedChar && !c.hasWall(1) && c.getSiblings().get(1).getMark() == 1)
+        if(mark == walkedChar && !c.hasWall(DIR_RIGHT)
+            && c.getSiblings().get(DIR_RIGHT).getMark() == MARK_WALKED)
         {
           waypoint = walkedChar;
         }
-        b.append(c.hasWall(1) ? '│' : waypoint);
+        b.append(c.hasWall(DIR_RIGHT) ? '│' : waypoint);
         waypoint = wayChar;
-        if(mark == walkedChar && !c.hasWall(2) && c.getSiblings().get(2).getMark() == 1)
+        if(mark == walkedChar && !c.hasWall(DIR_BOTTOM)
+            && c.getSiblings().get(DIR_BOTTOM).getMark() == MARK_WALKED)
         {
           waypoint = walkedChar;
         }

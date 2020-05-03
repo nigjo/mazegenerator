@@ -24,5 +24,6 @@ module de.nigjo.maze.score
 
   provides de.nigjo.maze.score.Scorer with
       de.nigjo.maze.score.StartEndScorer,
-      de.nigjo.maze.score.JunctionCounter;
+      de.nigjo.maze.score.JunctionCounter,
+      de.nigjo.maze.score.OnlyByExitScorer;
 }

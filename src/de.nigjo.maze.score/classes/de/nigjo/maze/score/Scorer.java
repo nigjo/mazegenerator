@@ -25,4 +25,8 @@ public interface Scorer
 
   public ScoreInfo getScores(MazeInfo mazeInfo);
 
+  default String getName()
+  {
+    return getClass().getSimpleName();
+  }
 }

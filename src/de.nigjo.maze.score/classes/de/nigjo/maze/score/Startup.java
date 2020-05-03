@@ -50,17 +50,20 @@ public class Startup
   private static Collection<ScoreInfo> findScores(List<MazeInfo> mazes)
   {
     List<ScoreInfo> scores = new ArrayList<>();
-    Scorer scorer;
-    switch(System.getProperty("de.nigjo.maze.scorer", ""))
+    ServiceLoader<Scorer> scorers = ServiceLoader.load(Scorer.class);
+    Scorer scorer = scorers.findFirst().orElseThrow();
+    String config = System.getProperty("de.nigjo.maze.scorer");
+    if(config != null)
     {
-      case "de.nigjo.maze.score.JunctionCounter":
-      case "junctions":
-        scorer = new JunctionCounter();
-        break;
-      case "de.nigjo.maze.score.StartEndScorer":
-      case "startend":
-      default:
-        scorer = new StartEndScorer();
+      for(Scorer impl : scorers)
+      {
+        if(config.equals(impl.getClass().getName())
+            || config.equalsIgnoreCase(impl.getName()))
+        {
+          scorer = impl;
+          break;
+        }
+      }
     }
     for(MazeInfo info : mazes)
     {

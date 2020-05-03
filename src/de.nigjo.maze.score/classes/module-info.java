@@ -20,4 +20,9 @@ module de.nigjo.maze.score
   requires de.nigjo.maze.generator;
 
   uses de.nigjo.maze.core.MazeGenerator;
+  uses de.nigjo.maze.score.Scorer;
+
+  provides de.nigjo.maze.score.Scorer with
+      de.nigjo.maze.score.StartEndScorer,
+      de.nigjo.maze.score.JunctionCounter;
 }

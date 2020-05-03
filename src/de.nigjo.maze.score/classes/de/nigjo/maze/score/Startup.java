@@ -15,7 +15,13 @@
  */
 package de.nigjo.maze.score;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.ServiceLoader;
+import java.util.TreeMap;
 
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
@@ -43,13 +49,14 @@ public class Startup
 
   private static Collection<ScoreInfo> findScores(List<MazeInfo> mazes)
   {
-    Set<ScoreInfo> scores = new TreeSet<>(Startup::sortByScore);
+    List<ScoreInfo> scores = new ArrayList<>();
     Scorer scorer = new StartEndScorer();
     for(MazeInfo info : mazes)
     {
       ScoreInfo scoreData = scorer.getScores(info);
       scores.add(scoreData);
     }
+    scores.sort(Startup::sortByScore);
     return scores;
   }
 
@@ -106,6 +113,21 @@ public class Startup
 
   private static int sortByScore(ScoreInfo s1, ScoreInfo s2)
   {
+    if(s2.scores == null)
+    {
+      if(s1.scores == null)
+      {
+        return 0;
+      }
+      else
+      {
+        return -1;
+      }
+    }
+    else if(s1 == null)
+    {
+      return 1;
+    }
     double delta = s1.scores.getOrDefault("score", 0.).doubleValue()
         - s2.scores.getOrDefault("score", 0.).doubleValue();
 
@@ -135,24 +157,28 @@ public class Startup
           QuadraticMazePainter.toString(info.maze, '·', item.marker);
       Map<String, Number> scoreData = new TreeMap<>(Startup::sortWithScoreFirst);
 
-      scoreData.putAll(item.scores);
       StringBuilder data = new StringBuilder();
-      data.append(String.format("id-%03d", sorted.indexOf(info) + 1));
-      for(Map.Entry<String, Number> entry : scoreData.entrySet())
+      data.append(String.format("id-%03d", sorted.indexOf(item) + 1));
+      if(item.scores != null)
       {
-        data.append(", ")
-            .append(entry.getKey())
-            .append(": ");
-        Number num = entry.getValue();
-        if(num instanceof Integer
-            || num instanceof Long
-            || num instanceof Short)
+        scoreData.putAll(item.scores);
+
+        for(Map.Entry<String, Number> entry : scoreData.entrySet())
         {
-          data.append(num);
-        }
-        else
-        {
-          data.append(String.format("%4.1f", num));
+          data.append(", ")
+              .append(entry.getKey())
+              .append(": ");
+          Number num = entry.getValue();
+          if(num instanceof Integer
+              || num instanceof Long
+              || num instanceof Short)
+          {
+            data.append(num);
+          }
+          else
+          {
+            data.append(String.format("%4.1f", num));
+          }
         }
       }
 

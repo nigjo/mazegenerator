@@ -38,13 +38,14 @@ public class QuadraticMazePainter
 
   public static String toString(Maze maze)
   {
-    return toString(maze, WAY, Collections.emptyMap());
+    return toString(maze, WAY, null);
   }
 
   public static String toString(Maze maze,
       char way, Map<Integer, Character> states)
   {
-    Map<Integer, Character> usedStates = new HashMap<>(states);
+    Map<Integer, Character> usedStates =
+        states == null ? Collections.emptyMap() : new HashMap<>(states);
     usedStates.putIfAbsent(MARK_CURRENT, NOW);
     usedStates.putIfAbsent(MARK_WALKED, WALKED);
     usedStates.putIfAbsent(MARK_DEADEND, DEADEND);

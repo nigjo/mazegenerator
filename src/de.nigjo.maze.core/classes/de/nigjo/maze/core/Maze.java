@@ -16,6 +16,7 @@
 package de.nigjo.maze.core;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public abstract class Maze
 
   public Collection<Cell> getCells()
   {
-    return cells;
+    return Collections.unmodifiableCollection(cells);
   }
 
   public void setEntance(Cell entance)

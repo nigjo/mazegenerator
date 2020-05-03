@@ -50,7 +50,18 @@ public class Startup
   private static Collection<ScoreInfo> findScores(List<MazeInfo> mazes)
   {
     List<ScoreInfo> scores = new ArrayList<>();
-    Scorer scorer = new StartEndScorer();
+    Scorer scorer;
+    switch(System.getProperty("de.nigjo.maze.scorer", ""))
+    {
+      case "de.nigjo.maze.score.JunctionCounter":
+      case "junctions":
+        scorer = new JunctionCounter();
+        break;
+      case "de.nigjo.maze.score.StartEndScorer":
+      case "startend":
+      default:
+        scorer = new StartEndScorer();
+    }
     for(MazeInfo info : mazes)
     {
       ScoreInfo scoreData = scorer.getScores(info);

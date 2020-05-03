@@ -65,7 +65,7 @@ public class QuadraticMaze extends Maze
   @Override
   public List<Cell> getCells()
   {
-    return (List<Cell>)super.getCells();
+    return List.copyOf(super.getCells());
   }
 
 }

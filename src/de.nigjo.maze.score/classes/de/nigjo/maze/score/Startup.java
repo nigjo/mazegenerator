@@ -15,12 +15,7 @@
  */
 package de.nigjo.maze.score;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.ServiceLoader;
-import java.util.TreeMap;
+import java.util.*;
 
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
@@ -41,19 +36,19 @@ public class Startup
     List<MazeInfo> mazes = generateMazes(
         args.length > 3 ? args[3] : null, count, width, height);
 
-    Map<Map<String, Number>, MazeInfo> scores = findScores(mazes);
+    Collection<ScoreInfo> scores = findScores(mazes);
 
     printMazes(scores);
   }
 
-  private static Map<Map<String, Number>, MazeInfo> findScores(List<MazeInfo> mazes)
+  private static Collection<ScoreInfo> findScores(List<MazeInfo> mazes)
   {
-    Map<Map<String, Number>, MazeInfo> scores = new TreeMap<>(Startup::sortByScore);
+    Set<ScoreInfo> scores = new TreeSet<>(Startup::sortByScore);
     Scorer scorer = new StartEndScorer();
     for(MazeInfo info : mazes)
     {
-      Map<String, Number> scoreData = scorer.getScores(info);
-      scores.put(scoreData, info);
+      ScoreInfo scoreData = scorer.getScores(info);
+      scores.add(scoreData);
     }
     return scores;
   }
@@ -109,10 +104,10 @@ public class Startup
     return mazes;
   }
 
-  private static int sortByScore(Map<String, Number> m1, Map<String, Number> m2)
+  private static int sortByScore(ScoreInfo s1, ScoreInfo s2)
   {
-    double delta = m1.getOrDefault("score", 0.).doubleValue()
-        - m2.getOrDefault("score", 0.).doubleValue();
+    double delta = s1.scores.getOrDefault("score", 0.).doubleValue()
+        - s2.scores.getOrDefault("score", 0.).doubleValue();
 
     return delta < 0 ? -1 : (delta > 0 ? 1 : 0);
   }
@@ -130,19 +125,17 @@ public class Startup
     return m1.compareToIgnoreCase(m2);
   }
 
-  private static void printMazes(Map<Map<String, Number>, MazeInfo> scores)
+  private static void printMazes(Collection<ScoreInfo> scores)
   {
-    List<MazeInfo> sorted = new ArrayList<>(scores.values());
-    for(Map.Entry<Map<String, Number>, MazeInfo> item : scores.entrySet())
+    List<ScoreInfo> sorted = new ArrayList<>(scores);
+    for(ScoreInfo item : scores)
     {
-      MazeInfo info = item.getValue();
+      MazeInfo info = item.mazeInfo;
       String levelView =
-          QuadraticMazePainter.toString(info.maze, '·', Map.of(
-              100, '+', 200, '-'
-          ));
+          QuadraticMazePainter.toString(info.maze, '·', item.marker);
       Map<String, Number> scoreData = new TreeMap<>(Startup::sortWithScoreFirst);
 
-      scoreData.putAll(item.getKey());
+      scoreData.putAll(item.scores);
       StringBuilder data = new StringBuilder();
       data.append(String.format("id-%03d", sorted.indexOf(info) + 1));
       for(Map.Entry<String, Number> entry : scoreData.entrySet())

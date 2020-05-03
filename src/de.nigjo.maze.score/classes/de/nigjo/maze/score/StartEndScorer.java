@@ -29,9 +29,15 @@ import de.nigjo.maze.core.Maze;
  */
 public class StartEndScorer implements Scorer
 {
+  private static final int MARKER_START = 100;
+  private static final int MARKER_END = 200;
+
   @Override
-  public Map<String, Number> getScores(MazeInfo info)
+  public ScoreInfo getScores(MazeInfo info)
   {
+    ScoreInfo score = new ScoreInfo();
+    score.mazeInfo = info;
+
     Map<Cell, Integer> startDistance = new HashMap<>();
     Map<Cell, Integer> endDistance = new HashMap<>();
 
@@ -49,12 +55,12 @@ public class StartEndScorer implements Scorer
       {
         if(start > ende)
         {
-          cell.setMark(200);
+          cell.setMark(MARKER_END);
           endCount++;
         }
         else
         {
-          cell.setMark(100);
+          cell.setMark(MARKER_START);
           startCount++;
         }
       }
@@ -91,30 +97,21 @@ public class StartEndScorer implements Scorer
     float pStart = startCount / (float)sum;
     float pEnd = endCount / (float)sum;
 
-    return Map.of(
-        "score", pLength * 6 + pStart * 2,
-//        "start", (float)startCount,
-//        "end", (float)endCount,
+    score.marker = Map.of(
+        MARKER_START, '+', MARKER_END, '-'
+    );
+
+    score.scores = Map.of(
+        KEY_SCORE, pLength * 6 + pStart * 2,
+        "startCount", startCount,
+        "endCount", endCount,
         "level", level,
         "path", pLength,
         "start", pStart,
         "end", pEnd);
+    return score;
   }
 
-//  {
-//    String levelView =
-//        QuadraticMazePainter.toString(info.maze, '·', Map.of(
-//            100, '+', 200, '-'
-//        ));
-//    System.out.println(levelView);
-//    System.out.println(info.hash);
-//    System.out.println(String.format("id-%03d", mazes.indexOf(info) + 1)
-//        + ", path: " + String.format("%4.1f%%", info.length / sum)
-//        + ", start: " + String.format("%4.1f%%", info.startCount / sum)
-//        + ", end: " + String.format("%4.1f%%", info.endCount / sum)
-//        + ", lvl?: " + String.format("%2d", info.level)
-//    );
-//  }
   private static Cell findDistance(Maze maze, Cell entance,
       Map<Cell, Integer> distances)
   {

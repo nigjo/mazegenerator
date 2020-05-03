@@ -15,14 +15,15 @@
  */
 package de.nigjo.maze.score;
 
+import java.util.Map;
+
 /**
  *
  * @author nigjo
  */
-public interface Scorer
+public class ScoreInfo
 {
-  public static final String KEY_SCORE = "score";
-
-  public ScoreInfo getScores(MazeInfo mazeInfo);
-
+  MazeInfo mazeInfo;
+  Map<String, Number> scores;
+  Map<Integer, Character> marker;
 }

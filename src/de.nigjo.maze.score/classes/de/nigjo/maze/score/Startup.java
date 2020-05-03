@@ -153,6 +153,10 @@ public class Startup
     for(ScoreInfo item : scores)
     {
       MazeInfo info = item.mazeInfo;
+      if(info == null)
+      {
+        continue;
+      }
       String levelView =
           QuadraticMazePainter.toString(info.maze, '·', item.marker);
       Map<String, Number> scoreData = new TreeMap<>(Startup::sortWithScoreFirst);

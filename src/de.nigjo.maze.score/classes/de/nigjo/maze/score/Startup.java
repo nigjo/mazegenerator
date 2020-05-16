@@ -68,6 +68,24 @@ public class Startup
     for(MazeInfo info : mazes)
     {
       ScoreInfo scoreData = scorer.getScores(info);
+      if(mazes.size() == 1)
+      {
+        if(scoreData.name == null
+            && System.getProperty("de.nigjo.maze.score.name") != null)
+        {
+          scoreData.name = System.getProperty("de.nigjo.maze.score.name");
+        }
+        if(scoreData.id <= 0
+            && System.getProperty("de.nigjo.maze.score.id") != null)
+        {
+          Integer id = Integer.getInteger("de.nigjo.maze.score.id");
+          if(id != null)
+          {
+            scoreData.id = id;
+          }
+        }
+      }
+
       scores.add(scoreData);
     }
     scores.sort(Startup::sortByScore);
@@ -175,8 +193,22 @@ public class Startup
           QuadraticMazePainter.toString(info.maze, '·', item.marker);
       Map<String, Number> scoreData = new TreeMap<>(Startup::sortWithScoreFirst);
 
+      String name;
+      if(item.name != null)
+      {
+        name = item.name;
+      }
+      else
+      {
+        int id = item.id;
+        if(id <= 0)
+        {
+          id = sorted.indexOf(item) + 1;
+        }
+        name = String.format("id-%03d", id);
+      }
       StringBuilder data = new StringBuilder();
-      data.append(String.format("id-%03d", sorted.indexOf(item) + 1));
+      data.append(name);
       if(item.scores != null)
       {
         scoreData.putAll(item.scores);

@@ -23,6 +23,8 @@ import java.util.Map;
  */
 public class ScoreInfo
 {
+  int id;
+  String name;
   MazeInfo mazeInfo;
   Map<String, Number> scores;
   Map<Integer, Character> marker;

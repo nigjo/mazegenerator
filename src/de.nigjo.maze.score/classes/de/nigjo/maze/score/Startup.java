@@ -23,6 +23,7 @@ import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.TreeMap;
 
+import de.nigjo.maze.core.Config;
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
 import de.nigjo.maze.core.QuadraticMazePainter;
@@ -35,12 +36,11 @@ public class Startup
 {
   public static void main(String[] args)
   {
-    int width = Integer.parseInt(args[0]);
-    int height = Integer.parseInt(args[1]);
-    int count = Integer.parseInt(args[2]);
+    Config cfg = new Config();
+    cfg.parseCommandline(args, 3);
+    int count = args.length > 2 ? Integer.parseInt(args[2]) : 1;
 
-    List<MazeInfo> mazes = generateMazes(
-        args.length > 3 ? args[3] : null, count, width, height);
+    List<MazeInfo> mazes = generateMazes(cfg, count);
 
     Collection<ScoreInfo> scores = findScores(mazes);
 
@@ -68,6 +68,10 @@ public class Startup
     for(MazeInfo info : mazes)
     {
       ScoreInfo scoreData = scorer.getScores(info);
+      if(scoreData == null)
+      {
+        continue;
+      }
       if(mazes.size() == 1)
       {
         if(scoreData.name == null
@@ -93,28 +97,14 @@ public class Startup
   }
 
   private static List<MazeInfo> generateMazes(
-      String argHash, int count, int width, int height)
+      Config config, int count)
   {
-    long seed;
-    if(argHash != null)
-    {
-      try
-      {
-        seed = Long.parseLong(argHash, 10);
-      }
-      catch(NumberFormatException ex)
-      {
-        seed = argHash.hashCode();
-      }
-    }
-    else
-    {
-      seed = System.currentTimeMillis();
-    }
-    String hash = argHash != null ? argHash : String.format("%d", seed);
+    long seed = config.getSeed();
+    String hash = config.getHashBase() != null
+        ? config.getHashBase() : String.format("%d", seed);
 
     Map<String, Object> parameters = Map.of(
-        "width", width, "height", height);
+        "width", config.getWidth(), "height", config.getHeight());
 
     MazeGenerator generator = getGenerator("kruskal");
 

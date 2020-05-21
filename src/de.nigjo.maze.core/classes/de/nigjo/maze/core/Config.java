@@ -26,9 +26,15 @@ public class Config
 {
   private int width = 10;
   private int height = 10;
+  private String hashBase;
   private long seed = System.currentTimeMillis();
 
   public void parseCommandline(String[] args)
+  {
+    parseCommandline(args, 2);
+  }
+
+  public void parseCommandline(String[] args, int seedIndex)
   {
     if(args.length > 0)
     {
@@ -38,15 +44,16 @@ public class Config
     {
       height = Integer.parseInt(args[1]);
     }
-    if(args.length > 2 && !args[2].isEmpty())
+    if(args.length > seedIndex && !args[seedIndex].isEmpty())
     {
+      hashBase = args[seedIndex];
       try
       {
-        seed = Long.parseLong(args[2]);
+        seed = Long.parseLong(args[seedIndex]);
       }
       catch(NumberFormatException ex)
       {
-        seed = args[2].hashCode();
+        seed = args[seedIndex].hashCode();
       }
     }
   }
@@ -64,6 +71,11 @@ public class Config
   public long getSeed()
   {
     return seed;
+  }
+
+  public String getHashBase()
+  {
+    return hashBase;
   }
 
   public Map<String, Object> getParameters()

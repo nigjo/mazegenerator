@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.nigjo.maze.score;
+package de.nigjo.maze.score.scorer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +22,9 @@ import java.util.Map;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
+import de.nigjo.maze.score.api.MazeInfo;
+import de.nigjo.maze.score.api.ScoreInfo;
+import de.nigjo.maze.score.api.Scorer;
 
 /**
  *

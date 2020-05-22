@@ -15,18 +15,26 @@
  */
 package de.nigjo.maze.score;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.ServiceLoader;
-import java.util.TreeMap;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import de.nigjo.maze.core.Config;
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
 import de.nigjo.maze.core.QuadraticMazePainter;
+import de.nigjo.maze.score.api.MazeInfo;
+import de.nigjo.maze.score.api.ScoreInfo;
+import de.nigjo.maze.score.api.Scorer;
 
 /**
  *
@@ -40,11 +48,13 @@ public class Startup
     cfg.parseCommandline(args, 3);
     int count = args.length > 2 ? Integer.parseInt(args[2]) : 1;
 
-    List<MazeInfo> mazes = generateMazes(cfg, count);
+    List<MazeInfo> mazes = MazeGenerationManager.generateMazes(cfg, count);
 
     Collection<ScoreInfo> scores = findScores(mazes);
 
-    printMazes(scores);
+    ResultPrinter.printMazes(scores);
+
+    HashfileManager.store(scores);
   }
 
   private static Collection<ScoreInfo> findScores(List<MazeInfo> mazes)
@@ -96,43 +106,6 @@ public class Startup
     return scores;
   }
 
-  private static List<MazeInfo> generateMazes(
-      Config config, int count)
-  {
-    long seed = config.getSeed();
-    String hash = config.getHashBase() != null
-        ? config.getHashBase() : String.format("%d", seed);
-
-    Map<String, Object> parameters = Map.of(
-        "width", config.getWidth(), "height", config.getHeight());
-
-    MazeGenerator generator = getGenerator("kruskal");
-
-    Random rnd = new Random(seed);
-    List<MazeInfo> mazes = new ArrayList<>();
-    for(int i = 0; i < count; i++)
-    {
-      MazeInfo info = new MazeInfo();
-      if(count > 1)
-      {
-        seed = rnd.nextLong();
-        hash = String.format("%d", seed);
-      }
-
-      info.seed = seed;
-      info.hash = hash;
-
-      Maze maze = generator.generateMaze(seed, parameters);
-
-      info.maze = maze;
-
-      info.length = Solver.solve(maze);
-
-      mazes.add(info);
-    }
-    return mazes;
-  }
-
   private static int sortByScore(ScoreInfo s1, ScoreInfo s2)
   {
     if(s2.scores == null)
@@ -156,86 +129,230 @@ public class Startup
     return delta < 0 ? -1 : (delta > 0 ? 1 : 0);
   }
 
-  private static int sortWithScoreFirst(String m1, String m2)
+  private static class MazeGenerationManager
   {
-    if("score".equals(m1))
+    private static List<MazeInfo> generateMazes(Config cfg, int count)
     {
-      return -1;
-    }
-    if("score".equals(m2))
-    {
-      return 1;
-    }
-    return m1.compareToIgnoreCase(m2);
-  }
-
-  private static void printMazes(Collection<ScoreInfo> scores)
-  {
-    List<ScoreInfo> sorted = new ArrayList<>(scores);
-    for(ScoreInfo item : scores)
-    {
-      MazeInfo info = item.mazeInfo;
-      if(info == null)
+      List<MazeInfo> mazes;
+      List<String> hashes = HashfileManager.getKnownHashes();
+      if(hashes != null)
       {
-        continue;
-      }
-      String levelView =
-          QuadraticMazePainter.toString(info.maze, '·', item.marker);
-      Map<String, Number> scoreData = new TreeMap<>(Startup::sortWithScoreFirst);
-
-      String name;
-      if(item.name != null)
-      {
-        name = item.name;
+        mazes = generateKnownMazes(cfg, hashes);
       }
       else
       {
-        int id = item.id;
-        if(id <= 0)
-        {
-          id = sorted.indexOf(item) + 1;
-        }
-        name = String.format("id-%03d", id);
+        mazes = generateNewMazes(cfg, count);
       }
-      StringBuilder data = new StringBuilder();
-      data.append(name);
-      if(item.scores != null)
+      return mazes;
+    }
+
+    private static List<MazeInfo> generateNewMazes(Config config, int count)
+    {
+      long seed = config.getSeed();
+      String hash = config.getHashBase() != null
+          ? config.getHashBase() : String.format("%d", seed);
+
+      if(count > 1)
       {
-        scoreData.putAll(item.scores);
-
-        for(Map.Entry<String, Number> entry : scoreData.entrySet())
+        Random rnd = new Random(seed);
+        Map<Long, String> hashes = new LinkedHashMap<>();
+        for(int i = 0; i < count; i++)
         {
-          data.append(", ")
-              .append(entry.getKey())
-              .append(": ");
-          Number num = entry.getValue();
-          if(num instanceof Integer
-              || num instanceof Long
-              || num instanceof Short)
-          {
-            data.append(num);
-          }
-          else
-          {
-            data.append(String.format("%4.1f", num));
-          }
+          seed = rnd.nextLong();
+          hashes.put(seed, String.format("%d", seed));
         }
+        return generateMazes(config, hashes);
       }
+      else
+      {
+        return generateMazes(config, Map.of(seed, hash));
+      }
+    }
 
-      System.out.println(levelView);
-      System.out.println(info.hash);
-      System.out.println(data);
+    private static long hashHash(String hashBase)
+    {
+      try
+      {
+        return Long.parseLong(hashBase);
+      }
+      catch(NumberFormatException ex)
+      {
+        return hashBase.hashCode();
+      }
+    }
+
+    private static List<MazeInfo> generateKnownMazes(Config config, List<String> hashes)
+    {
+      Collector<String, ?, Map<Long, String>> toMap = Collectors.toMap(
+          MazeGenerationManager::hashHash, Function.identity(),
+          (a, b) -> a, LinkedHashMap::new);
+      return generateMazes(config, hashes.stream()
+          .collect(toMap));
+    }
+
+    private static List<MazeInfo> generateMazes(Config config, Map<Long, String> hashes)
+    {
+      Map<String, Object> parameters = Map.of(
+          "width", config.getWidth(), "height", config.getHeight());
+
+      MazeGenerator generator = getGenerator("kruskal");
+
+      List<MazeInfo> mazes = new ArrayList<>();
+      for(Map.Entry<Long, String> entry : hashes.entrySet())
+      {
+        long seed = entry.getKey();
+        Maze maze = generator.generateMaze(seed, parameters);
+
+        int length = Solver.solve(maze);
+        MazeInfo info = new MazeInfo(maze, seed, entry.getValue(), length);
+
+        mazes.add(info);
+      }
+      return mazes;
+    }
+
+    public static MazeGenerator getGenerator(String name)
+    {
+      ServiceLoader<MazeGenerator> services = ServiceLoader.load(MazeGenerator.class);
+      return services.stream()
+          .map(ServiceLoader.Provider::get)
+          .filter(gen -> gen.getClass().getSimpleName()
+          .toLowerCase().contains(name.toLowerCase()))
+          .findFirst()
+          .orElse(null);
     }
   }
 
-  public static MazeGenerator getGenerator(String name)
+  private static class HashfileManager
   {
-    ServiceLoader<MazeGenerator> services = ServiceLoader.load(MazeGenerator.class);
-    return services.stream()
-        .map(ServiceLoader.Provider::get)
-        .filter(gen -> gen.getClass().getSimpleName()
-        .toLowerCase().contains(name.toLowerCase()))
-        .findFirst()
-        .orElse(null);
+    private static final String HASHES_FILENAME =
+        System.getProperty("de.nigjo.maze.score.hashesfile");
+
+    static void store(Collection<ScoreInfo> scores)
+    {
+      if(HASHES_FILENAME != null)
+      {
+        Path hashesFiles = Paths.get(HASHES_FILENAME);
+        if(!Files.exists(hashesFiles))
+        {
+          try(BufferedWriter out = Files.newBufferedWriter(hashesFiles,
+              StandardCharsets.UTF_8,
+              StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING))
+          {
+            for(ScoreInfo score : scores)
+            {
+              out.write(score.mazeInfo.hash);
+              out.newLine();
+            }
+          }
+          catch(IOException ex)
+          {
+            System.err.println(ex.toString());
+          }
+        }
+      }
+    }
+
+    private static List<String> getKnownHashes()
+    {
+      if(HASHES_FILENAME != null)
+      {
+        Path hashesFiles = Paths.get(HASHES_FILENAME);
+        if(Files.exists(hashesFiles))
+        {
+          try
+          {
+            return Files.readAllLines(hashesFiles, StandardCharsets.UTF_8);
+          }
+          catch(IOException ex)
+          {
+            ex.printStackTrace(System.err);
+            System.exit(1);
+            return null;
+          }
+        }
+      }
+      return null;
+    }
+  }
+
+  private static class ResultPrinter
+  {
+    private static int sortWithScoreFirst(String m1, String m2)
+    {
+      if("score".equals(m1))
+      {
+        return -1;
+      }
+      if("score".equals(m2))
+      {
+        return 1;
+      }
+      return m1.compareToIgnoreCase(m2);
+    }
+
+    private static void printMazes(Collection<ScoreInfo> scores)
+    {
+      printMazes(scores, System.out);
+    }
+
+    private static void printMazes(Collection<ScoreInfo> scores, PrintStream out)
+    {
+      List<ScoreInfo> sorted = new ArrayList<>(scores);
+      for(ScoreInfo item : scores)
+      {
+        MazeInfo info = item.mazeInfo;
+        if(info == null)
+        {
+          continue;
+        }
+        String levelView =
+            QuadraticMazePainter.toString(info.maze, '·', item.marker);
+        Map<String, Number> scoreData = new TreeMap<>(ResultPrinter::sortWithScoreFirst);
+
+        String name;
+        if(item.name != null)
+        {
+          name = item.name;
+        }
+        else
+        {
+          int id = item.id;
+          if(id <= 0)
+          {
+            id = sorted.indexOf(item) + 1;
+          }
+          name = String.format("id-%03d", id);
+        }
+        StringBuilder data = new StringBuilder();
+        data.append(name);
+        if(item.scores != null)
+        {
+          scoreData.putAll(item.scores);
+
+          for(Map.Entry<String, Number> entry : scoreData.entrySet())
+          {
+            data.append(", ")
+                .append(entry.getKey())
+                .append(": ");
+            Number num = entry.getValue();
+            if(num instanceof Integer
+                || num instanceof Long
+                || num instanceof Short)
+            {
+              data.append(num);
+            }
+            else
+            {
+              data.append(String.format("%4.1f", num));
+            }
+          }
+        }
+
+        out.println(levelView);
+        out.println(info.hash);
+        out.println(data);
+      }
+    }
   }
 }

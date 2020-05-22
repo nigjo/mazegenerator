@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.nigjo.maze.score;
+package de.nigjo.maze.score.api;
 
 import de.nigjo.maze.core.Maze;
 
@@ -21,10 +21,18 @@ import de.nigjo.maze.core.Maze;
  *
  * @author nigjo
  */
-public class MazeInfo
+public class/*record*/ MazeInfo
 {
-  Maze maze;
-  long seed;
-  String hash;
-  int length;
+  public final Maze maze;
+  public final long seed;
+  public final String hash;
+  public final int length;
+
+  public MazeInfo(Maze maze, long seed, String hash, int length)
+  {
+    this.maze = maze;
+    this.seed = seed;
+    this.hash = hash;
+    this.length = length;
+  }
 }

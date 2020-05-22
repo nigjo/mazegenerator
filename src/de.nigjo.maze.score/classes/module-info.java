@@ -20,11 +20,13 @@ module de.nigjo.maze.score
   requires de.nigjo.maze.generator;
 
   uses de.nigjo.maze.core.MazeGenerator;
-  uses de.nigjo.maze.score.Scorer;
+  uses de.nigjo.maze.score.api.Scorer;
 
-  provides de.nigjo.maze.score.Scorer with
-      de.nigjo.maze.score.StartEndScorer,
-      de.nigjo.maze.score.JunctionCounter,
-      de.nigjo.maze.score.OnlyByExitScorer,
-      de.nigjo.maze.score.HightScrambler;
+  exports de.nigjo.maze.score.api;
+
+  provides de.nigjo.maze.score.api.Scorer with
+      de.nigjo.maze.score.scorer.StartEndScorer,
+      de.nigjo.maze.score.scorer.JunctionCounter,
+      de.nigjo.maze.score.scorer.OnlyByExitScorer,
+      de.nigjo.maze.score.scorer.HightScrambler;
 }

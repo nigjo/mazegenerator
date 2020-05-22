@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.nigjo.maze.score;
+package de.nigjo.maze.score.api;
 
 import java.util.Map;
 
@@ -21,11 +21,11 @@ import java.util.Map;
  *
  * @author nigjo
  */
-public class ScoreInfo
+public class/*record*/ ScoreInfo
 {
-  int id;
-  String name;
-  MazeInfo mazeInfo;
-  Map<String, Number> scores;
-  Map<Integer, Character> marker;
+  public int id;
+  public String name;
+  public MazeInfo mazeInfo;
+  public Map<String, Number> scores;
+  public Map<Integer, Character> marker;
 }

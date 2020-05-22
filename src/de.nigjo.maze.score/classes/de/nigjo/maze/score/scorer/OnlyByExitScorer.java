@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.nigjo.maze.score;
+package de.nigjo.maze.score.scorer;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import de.nigjo.maze.core.Cell;
+import de.nigjo.maze.score.api.MazeInfo;
+import de.nigjo.maze.score.api.ScoreInfo;
+import de.nigjo.maze.score.api.Scorer;
 
 /**
  *
@@ -73,8 +76,7 @@ public class OnlyByExitScorer implements Scorer
     for(Cell sibling : siblings)
     {
       if(sibling == null
-          || !(sibling.getMark() == Cell.MARK_UNKNOWN
-          || sibling.getMark() == Solver.MARK_DEADEND)
+          || !(sibling.getMark() == Cell.MARK_UNKNOWN)
           || cell.hasWall(siblings.indexOf(sibling)))
       {
         continue;

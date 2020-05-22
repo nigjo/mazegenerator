@@ -44,6 +44,13 @@ public class Startup
 {
   public static void main(String[] args)
   {
+    if("--list".equals(args[0]))
+    {
+      ServiceLoader<Scorer> scorers = ServiceLoader.load(Scorer.class);
+      scorers.forEach(s -> System.out.println(s.getName()));
+      return;
+    }
+
     Config cfg = new Config();
     cfg.parseCommandline(args, 3);
     int count = args.length > 2 ? Integer.parseInt(args[2]) : 1;

@@ -15,13 +15,7 @@
  */
 package de.nigjo.maze.score.scorer;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.score.api.MazeInfo;
@@ -48,15 +42,12 @@ public class HightScrambler implements Scorer
         "height", CONFIG_HEIGHT
     );
 
-    String propHeight = System.getProperty("de.nigjo.maze.score.height");
-
     Cell entance = mazeInfo.maze.getEntance();
 
-    Cell exit = null;
     List<Cell> fixedHeightCells = new ArrayList<>();
     fixedHeightCells.add(entance);
     //rnd.ints(rnd.nextLong()).count();
-    Map<Cell, Integer> heights = new HashMap<>();
+    Map<Cell, Integer> heights = new LinkedHashMap<>();
     //Collection<Cell> cells = mazeInfo.maze.getCells();
     Queue<Cell> queue = new ArrayDeque();
     queue.add(entance);
@@ -71,8 +62,7 @@ public class HightScrambler implements Scorer
       }
       if(mazeInfo.maze.isExit(next))
       {
-        exit = next;
-        fixedHeightCells.add(exit);
+        fixedHeightCells.add(next);
         heights.put(next, 0);
       }
       else
@@ -90,7 +80,7 @@ public class HightScrambler implements Scorer
 
     heights.put(entance, 0);
 
-    levelOutHeights(heights, fixedHeightCells, rnd);
+    levelOutHeights(entance, heights, fixedHeightCells, rnd);
 
     Map<Integer, Character> chars = new HashMap<>();
     for(Map.Entry<Cell, Integer> entry : heights.entrySet())
@@ -119,23 +109,29 @@ public class HightScrambler implements Scorer
     return "height";
   }
 
-  private void levelOutHeights(Map<Cell, Integer> heights, List<Cell> fixedHeightCells,
-      Random rnd)
+  private void levelOutHeights(Cell entrance, Map<Cell, Integer> heights,
+      List<Cell> fixedHeightCells, Random rnd)
   {
     boolean levelChanged;
     do
     {
       levelChanged = false;
-      for(Cell cell : heights.keySet())
+      Set<Cell> done = new HashSet<>();
+      List<Cell> todo = new ArrayList<>();
+      todo.add(entrance);
+      while(!todo.isEmpty())
       {
+        Cell cell = todo.remove(0);
+        done.add(cell);
         List<Cell> siblings = cell.getSiblings();
         for(Cell sibling : siblings)
         {
-          if(sibling == null
+          if(done.contains(sibling)
               || cell.hasWall(siblings.indexOf(sibling)))
           {
             continue;
           }
+          todo.add(sibling);
           int h1 = heights.get(cell);
           int h2 = heights.get(sibling);
           int delta = h2 - h1;
@@ -148,7 +144,15 @@ public class HightScrambler implements Scorer
             }
             else if(fixedHeightCells.contains(sibling))
             {
-              levelOutCells(true, heights, cell, sibling);
+              if(delta < 0)
+              {
+                heights.put(cell, heights.get(sibling) + 1);
+              }
+              else
+              {
+                heights.put(cell, heights.get(sibling) - 1);
+              }
+              fixedHeightCells.add(cell);
             }
             else
             {
@@ -158,8 +162,50 @@ public class HightScrambler implements Scorer
           }
         }
       }
+      //log(heights.values());
     }
     while(levelChanged);
+
+    validateHeights(entrance, heights);
+  }
+
+  private void validateHeights(Cell entrance, Map<Cell, Integer> heights)
+  {
+    Set<Cell> done = new HashSet<>();
+    Queue<Cell> queue = new ArrayDeque<>();
+    queue.add(entrance);
+    while(!queue.isEmpty())
+    {
+      Cell cell = queue.poll();
+
+      int cellHeight = heights.get(cell);
+
+      List<Cell> siblings = cell.getSiblings();
+      for(Cell sibling : siblings)
+      {
+        if(sibling != null && !done.contains(sibling)
+            && !cell.hasWall(siblings.indexOf(sibling)))
+        {
+          int sibHeight = heights.get(sibling);
+          if(Math.abs(sibHeight - cellHeight) > 1)
+          {
+            throw new IllegalStateException("height difference to high");
+          }
+        }
+      }
+      done.add(cell);
+    }
+  }
+
+  private static void log(Collection<Integer> heights)
+  {
+    StringBuilder b = new StringBuilder();
+    for(Integer height : heights)
+    {
+      b.append(',').append(height);
+    }
+    b.append('=').append(b.toString().hashCode());
+    System.out.println(b);
   }
 
   private void levelOutCells(boolean levelOutFirstCell,

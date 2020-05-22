@@ -37,7 +37,7 @@ public class HightScrambler implements Scorer
     ScoreInfo info = new ScoreInfo();
     info.mazeInfo = mazeInfo;
     info.scores = Map.of(
-        KEY_SCORE, mazeInfo.length,
+        KEY_SCORE, 0,
         "length", mazeInfo.length,
         "height", CONFIG_HEIGHT
     );

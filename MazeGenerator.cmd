@@ -13,10 +13,10 @@ if not defined MAZE_HEIGHT set MAZE_HEIGHT=%DEFAULT_HEIGHT%
 if not defined MAZE_SEED set "MAZE_SEED=%DATE%"
 
 if not "%~1" == "auto" (
-call bin\MazeGenerator.bat %MAZE_WIDTH% %MAZE_HEIGHT% "%MAZE_SEED%"
+call %~dp0bin\MazeGenerator.bat %MAZE_WIDTH% %MAZE_HEIGHT% "%MAZE_SEED%"
 ) else (
 echo "%MAZE_SEED%"
-call bin\MazeGenerator.bat %MAZE_WIDTH% %MAZE_HEIGHT% "%MAZE_SEED%"
+call %~dp0bin\MazeGenerator.bat %MAZE_WIDTH% %MAZE_HEIGHT% "%MAZE_SEED%"
 )>>%~n0.log
 
 if not "%~1" == "auto" pause

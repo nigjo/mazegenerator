@@ -33,10 +33,7 @@ public class QuadraticMazePainter
   public static final int DIR_BOTTOM = 2;
   public static final int DIR_LEFT = 3;
 
-  public static final int MARK_DEADEND = 903;
-
   private static final char WAY = '·';
-  private static final char DEADEND = '·';//'◦';
   private static final char WALKED = System.console() == null ? '•' : '#';//'•';
   private static final char NOW = '*';
 
@@ -46,13 +43,13 @@ public class QuadraticMazePainter
   }
 
   public static String toString(Maze maze,
-      char way, Map<Integer, Character> states)
+      char cellFallback, Map<Integer, Character> states)
   {
     Map<Integer, Character> usedStates =
         states == null ? new HashMap<>() : new HashMap<>(states);
     usedStates.putIfAbsent(MARK_CURRENT, NOW);
     usedStates.putIfAbsent(MARK_WALKED, WALKED);
-    usedStates.putIfAbsent(MARK_DEADEND, DEADEND);
+    //usedStates.putIfAbsent(MARK_DEADEND, DEADEND);
     List<Cell> cells = (List<Cell>)maze.getCells();
     if(cells == null || cells.isEmpty())
     {
@@ -67,7 +64,7 @@ public class QuadraticMazePainter
     }
     int height = maze.getHeight();
 
-    char wayChar = way;
+    char wayChar = cellFallback;
     char walkedChar = usedStates.getOrDefault(MARK_WALKED, WALKED);
 
     for(int row = 0; row < height; row++)
@@ -79,7 +76,7 @@ public class QuadraticMazePainter
       for(int col = 0; col < width; col++)
       {
         Cell c = cells.get(row * width + col);
-        char mark = usedStates.getOrDefault(c.getMark(), way);
+        char mark = usedStates.getOrDefault(c.getMark(), cellFallback);
         b.append(' ').append(mark).append(' ');
         char waypoint = wayChar;
         if(mark == walkedChar && !c.hasWall(DIR_RIGHT)

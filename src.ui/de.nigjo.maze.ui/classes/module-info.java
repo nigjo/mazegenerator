@@ -18,10 +18,13 @@ module de.nigjo.maze.ui
 {
   requires java.desktop;
   requires de.nigjo.maze.core;
-  uses de.nigjo.maze.core.MazeGenerator;
-  uses de.nigjo.maze.ui.MazePainter;
 
-  provides de.nigjo.maze.ui.MazePainter
+  uses de.nigjo.maze.core.MazeGenerator;
+  uses de.nigjo.maze.ui.api.MazePainter;
+
+  exports de.nigjo.maze.ui.api;
+
+  provides de.nigjo.maze.ui.api.MazePainter
       with de.nigjo.maze.ui.painter.InnerOuterPainter,
       de.nigjo.maze.ui.painter.SimpleGridPainter,
       de.nigjo.maze.ui.painter.CenteredViewBoxPainter;

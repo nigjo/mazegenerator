@@ -24,6 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import de.nigjo.maze.core.Maze;
+import de.nigjo.maze.ui.api.MazePainter;
 
 /**
  *

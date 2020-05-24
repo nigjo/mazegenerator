@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.nigjo.maze.ui;
+package de.nigjo.maze.ui.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,7 @@ import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
 
 /**
+ * A method to paint a Maze.
  *
  * @author nigjo
  */

@@ -38,6 +38,7 @@ import javax.swing.UIManager;
 
 import de.nigjo.maze.core.Cell;
 import de.nigjo.maze.core.Maze;
+import de.nigjo.maze.ui.api.MazePainter;
 
 /**
  * A Panel to paint and walk a Maze.

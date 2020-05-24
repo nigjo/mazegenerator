@@ -18,6 +18,7 @@ module de.nigjo.maze.score
 {
   requires de.nigjo.maze.core;
   requires de.nigjo.maze.generator;
+  requires de.nigjo.maze.solver;
 
   uses de.nigjo.maze.core.MazeGenerator;
   uses de.nigjo.maze.score.api.Scorer;

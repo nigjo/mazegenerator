@@ -21,6 +21,7 @@ import de.nigjo.maze.core.Config;
 import de.nigjo.maze.core.Maze;
 import de.nigjo.maze.core.MazeGenerator;
 import de.nigjo.maze.core.QuadraticMazePainter;
+import de.nigjo.maze.solver.Solver;
 
 /**
  * Eine neue Klasse von Jens Hofschröer. Erstellt Jan 28, 2020, 8:52:23 AM.

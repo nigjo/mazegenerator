@@ -15,6 +15,8 @@
  */
 package de.nigjo.maze.score;
 
+import de.nigjo.maze.solver.Solver;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintStream;

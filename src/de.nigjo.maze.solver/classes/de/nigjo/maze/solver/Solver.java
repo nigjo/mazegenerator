@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.nigjo.maze;
+package de.nigjo.maze.solver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +25,11 @@ import de.nigjo.maze.core.Maze;
  *
  * @author nigjo
  */
-class Solver
+public class Solver
 {
-  static int MARK_NEVER = Cell.MARK_UNKNOWN;
-  static int MARK_WALK = Cell.MARK_WALKED;
-  static int MARK_DEADEND = 903;
+  private static final int MARK_DEADEND = 903;
 
-  static int solve(Maze generated)
+  public static int solve(Maze generated)
   {
     Cell entance = generated.getEntance();
     List<Cell> checked = new ArrayList<>();
@@ -40,7 +38,7 @@ class Solver
     while(!checked.isEmpty())
     {
       Cell current = checked.remove(0);
-      current.setMark(MARK_WALK);
+      current.setMark(Cell.MARK_WALKED);
       if(generated.isExit(current))
       {
         while(!checked.isEmpty())
@@ -82,7 +80,7 @@ class Solver
       {
         if(!current.hasWall(i))
         {
-          if(siblings.get(i).getMark() == MARK_WALK)
+          if(siblings.get(i).getMark() == Cell.MARK_WALKED)
           {
             if(walked == null)
             {
@@ -106,9 +104,13 @@ class Solver
     int counter = 0;
     for(Cell cell : generated.getCells())
     {
-      if(cell.getMark() == MARK_WALK)
+      if(cell.getMark() == Cell.MARK_WALKED)
       {
         counter++;
+      }
+      else if(cell.getMark() != Cell.MARK_UNKNOWN)
+      {
+        cell.setMark(Cell.MARK_UNKNOWN);
       }
     }
     return counter;

@@ -85,6 +85,7 @@
     <!-- fallback if no git is here -->
     <jar destfile="${dist.dir}/${module.jar.filename}" update="true" manifestencoding="UTF-8">
       <manifest>
+        <attribute name="App-Version" value="${application.version}"/>
         <attribute name="Git-Hash" value="${git.hash}"/>
       </manifest>
     </jar>

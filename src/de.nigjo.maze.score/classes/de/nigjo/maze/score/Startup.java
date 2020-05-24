@@ -42,33 +42,52 @@ import de.nigjo.maze.score.api.Scorer;
  */
 public class Startup
 {
+  @Config.CliParameter(standalone = true, longOption = "list")
+  @SuppressWarnings("FieldMayBeFinal")
+  private static boolean SHOW_LIST = false;
+  @Config.CliParameter(standalone = true, longOption = "all")
+  @SuppressWarnings("FieldMayBeFinal")
+  private static boolean SHOW_ALL = false;
+  @Config.CliParameter(longOption = "count", defaultValue = "1")
+  @SuppressWarnings("FieldMayBeFinal")
+  private static int ARG_COUNT = 1;
+
   public static void main(String[] args)
   {
-    if("--list".equals(args[0]))
+    Config cfg = new Config();
+    cfg.parseCommandline(args, 3);
+
+    if(SHOW_LIST)
     {
       ServiceLoader<Scorer> scorers = ServiceLoader.load(Scorer.class);
       scorers.forEach(s -> System.out.println(s.getName()));
       return;
     }
     List<String> hashes;
-    if("--all".equals(args[0]))
+    if(SHOW_ALL)
     {
       String[] shifted = Arrays.asList(args)
-          .subList(1, args.length)
+          .stream()
+          .filter(arg->!"--all".equals(arg))
           .toArray(String[]::new);
-      Config cfg = new Config();
-      cfg.parseCommandline(shifted, 3);
-      int count = shifted.length > 2 ? Integer.parseInt(shifted[2]) : 1;
+      Config scfg = new Config();
+      scfg.parseCommandline(shifted, 3);
 
-      hashes = performAllScores(cfg, count);
+      int count = ARG_COUNT;
+      if(scfg.isLegacyMode() && shifted.length > 2)
+      {
+        count = Integer.parseInt(shifted[2]);
+      }
 
+      hashes = performAllScores(scfg, count);
     }
     else
     {
-
-      Config cfg = new Config();
-      cfg.parseCommandline(args, 3);
-      int count = args.length > 2 ? Integer.parseInt(args[2]) : 1;
+      int count = ARG_COUNT;
+      if(cfg.isLegacyMode() && args.length > 2)
+      {
+        count = Integer.parseInt(args[2]);
+      }
 
       List<MazeInfo> mazes = MazeGenerationManager.generateMazes(cfg, count);
 

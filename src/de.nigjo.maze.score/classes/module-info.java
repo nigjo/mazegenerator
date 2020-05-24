@@ -23,6 +23,7 @@ module de.nigjo.maze.score
   uses de.nigjo.maze.score.api.Scorer;
 
   exports de.nigjo.maze.score.api;
+  opens de.nigjo.maze.score to de.nigjo.maze.core;
 
   provides de.nigjo.maze.score.api.Scorer with
       de.nigjo.maze.score.scorer.StartEndScorer,

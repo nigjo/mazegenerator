@@ -38,7 +38,12 @@ public class FrameBuilder
 
   public static void buildFrame()
   {
-    JFrame frame = new JFrame(FRAME_TITLE);
+    String title = FRAME_TITLE
+        + FrameBuilder.class.getModule().getDescriptor().version()
+            .map(v -> " - v" + v)
+            .orElse("");
+
+    JFrame frame = new JFrame(title);
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     frame.setLocationByPlatform(true);
     frame.setIconImages(Arrays.asList(
@@ -66,7 +71,7 @@ public class FrameBuilder
   public static Optional<MazePanel> findMazePanel()
   {
     return Arrays.stream(JFrame.getFrames())
-        .filter(frame -> FRAME_TITLE.equals(frame.getTitle()))
+        .filter(frame -> frame.getTitle().startsWith(FRAME_TITLE))
         .findAny()
         .map(JFrame.class::cast)
         .map(JFrame::getContentPane)

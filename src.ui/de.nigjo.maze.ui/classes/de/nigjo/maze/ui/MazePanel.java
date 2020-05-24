@@ -223,7 +223,7 @@ public class MazePanel extends JPanel
   protected void paintComponent(Graphics g)
   {
     super.paintComponent(g);
-    if(painter != null)
+    if(painter != null && current != null)
     {
       AffineTransform transform = ((Graphics2D)g).getTransform();
       painter.paintMaze(maze, current, direction, getSize(), g);

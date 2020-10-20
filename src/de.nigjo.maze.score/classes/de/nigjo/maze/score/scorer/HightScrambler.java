@@ -50,7 +50,7 @@ public class HightScrambler implements Scorer
         "height", CONFIG_HEIGHT
     );
 
-    Cell entance = mazeInfo.maze.getEntance();
+    Cell entance = mazeInfo.maze.getEntrance();
 
     List<Cell> fixedHeightCells = new ArrayList<>();
     fixedHeightCells.add(entance);

@@ -43,7 +43,7 @@ public class JunctionCounter implements Scorer
     int abgaenge = 0;
     int lastdir = QuadraticMazePainter.DIR_BOTTOM;
     Cell last = null;
-    Cell current = mazeInfo.maze.getEntance();
+    Cell current = mazeInfo.maze.getEntrance();
     while(current != null && !mazeInfo.maze.isExit(current))
     {
       Cell next = null;

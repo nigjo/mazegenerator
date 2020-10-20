@@ -47,7 +47,7 @@ public class StartEndScorer implements Scorer
     Map<Cell, Integer> startDistance = new HashMap<>();
     Map<Cell, Integer> endDistance = new HashMap<>();
 
-    Cell exit = findDistance(info.maze, info.maze.getEntance(), startDistance);
+    Cell exit = findDistance(info.maze, info.maze.getEntrance(), startDistance);
     findDistance(info.maze, exit, endDistance);
 
     int startCount = 0;

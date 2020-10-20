@@ -74,7 +74,7 @@ public interface MazePainter
   static boolean isDoor(Maze maze, Cell current, int wallDirection)
   {
     return (maze.isExit(current) && current.norm(wallDirection) == DIR_SOUTH)
-        || (maze.getEntance() == current && current.norm(wallDirection) == DIR_NORTH);
+        || (maze.getEntrance() == current && current.norm(wallDirection) == DIR_NORTH);
   }
 
   public default void init()

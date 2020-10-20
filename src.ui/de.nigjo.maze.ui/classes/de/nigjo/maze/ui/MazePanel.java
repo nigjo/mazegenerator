@@ -131,7 +131,7 @@ public class MazePanel extends JPanel
   public void setMaze(Maze maze)
   {
     this.maze = maze;
-    this.current = maze.getEntance();
+    this.current = maze.getEntrance();
     putClientProperty(PROP_CURRENT_CELL, current);
     this.direction = MazePainter.DIR_SOUTH;
     putClientProperty(PROP_DIRECTION, direction);

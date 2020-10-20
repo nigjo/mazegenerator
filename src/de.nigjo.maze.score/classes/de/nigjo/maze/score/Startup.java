@@ -15,8 +15,6 @@
  */
 package de.nigjo.maze.score;
 
-import de.nigjo.maze.solver.Solver;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -37,6 +35,7 @@ import de.nigjo.maze.core.QuadraticMazePainter;
 import de.nigjo.maze.score.api.MazeInfo;
 import de.nigjo.maze.score.api.ScoreInfo;
 import de.nigjo.maze.score.api.Scorer;
+import de.nigjo.maze.solver.Solver;
 
 /**
  *
@@ -70,7 +69,7 @@ public class Startup
     {
       String[] shifted = Arrays.asList(args)
           .stream()
-          .filter(arg->!"--all".equals(arg))
+          .filter(arg -> !"--all".equals(arg))
           .toArray(String[]::new);
       Config scfg = new Config();
       scfg.parseCommandline(shifted, 3);
@@ -190,6 +189,7 @@ public class Startup
       List<MazeInfo> mazes = MazeGenerationManager.generateMazes(cfg, count);
       Collection<ScoreInfo> scores = findScores(mazes, scorer);
       Set<Number> harvester = new TreeSet<>();
+      scores.forEach(s -> s.name = scorer.getName());
       scores.forEach(s -> harvester.add(s.scores.get("score")));
       List<Number> punkte = new ArrayList<>(harvester);
       for(ScoreInfo score : scores)
@@ -461,6 +461,10 @@ public class Startup
           Map<String, Number> scores = new TreeMap<>(ResultPrinter::sortWithScoreFirst);
           scores.putAll(info.scores);
 
+          if(info.name != null)
+          {
+            scoreValues.append(info.name).append(", ");
+          }
           ResultPrinter.appendScores(scores, scoreValues);
           params.add(scoreValues.toString().split(", "));
         }
@@ -500,6 +504,7 @@ public class Startup
             System.out.println(b);
           }
         }
+        System.out.println();
       }
     }
 

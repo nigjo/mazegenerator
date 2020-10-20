@@ -49,7 +49,7 @@ public class HightScrambler implements Scorer
     //rnd.ints(rnd.nextLong()).count();
     Map<Cell, Integer> heights = new LinkedHashMap<>();
     //Collection<Cell> cells = mazeInfo.maze.getCells();
-    Queue<Cell> queue = new ArrayDeque();
+    Queue<Cell> queue = new ArrayDeque<>();
     queue.add(entance);
 
     Random rnd = new Random(mazeInfo.seed);

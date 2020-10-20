@@ -31,7 +31,7 @@ public class Solver
 
   public static int solve(Maze generated)
   {
-    Cell entance = generated.getEntance();
+    Cell entance = generated.getEntrance();
     List<Cell> checked = new ArrayList<>();
     List<Cell> deadends = new ArrayList<>();
     checked.add(entance);
@@ -95,7 +95,7 @@ public class Solver
         }
       }
       if(walked != null && !generated.isExit(current)
-          && current != generated.getEntance())
+          && current != generated.getEntrance())
       {
         current.setMark(MARK_DEADEND);
         deadends.add(walked);

@@ -25,6 +25,12 @@ import de.nigjo.maze.score.api.ScoreInfo;
 import de.nigjo.maze.score.api.Scorer;
 
 /**
+ * A scorer "exit" which will test what ways are "beyond" the exit. These ways are defined
+ * by that cells which are only reachable from the start by passing by the exit. The more
+ * cells are "exit-cells" the lower the score. Longer "optimal ways" will result in a
+ * higher score.
+ *
+ * <pre>score = (&lt;non-exit-cell-count&gt; * 0.1) * &lt;maze-length&gt;</pre>
  *
  * @author nigjo
  */

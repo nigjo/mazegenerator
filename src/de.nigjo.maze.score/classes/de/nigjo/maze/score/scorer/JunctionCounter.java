@@ -25,6 +25,9 @@ import de.nigjo.maze.score.api.ScoreInfo;
 import de.nigjo.maze.score.api.Scorer;
 
 /**
+ * A scorer to count the numbers of junctions and side corridors of the main path.
+ * Every junction will count 1.5 points, every side corridor 0.75 points. These points
+ * are multiplied by the double length of the main path.
  *
  * @author nigjo
  */

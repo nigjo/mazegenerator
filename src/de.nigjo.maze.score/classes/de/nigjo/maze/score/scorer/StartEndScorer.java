@@ -27,6 +27,9 @@ import de.nigjo.maze.score.api.ScoreInfo;
 import de.nigjo.maze.score.api.Scorer;
 
 /**
+ * This scorer will count the numbers of cells "closer" to the start and end of the
+ * main path. The length of the main path is multiplied by 6 and the double number of
+ * cells closer to the start is added.
  *
  * @author nigjo
  */
@@ -109,7 +112,7 @@ public class StartEndScorer implements Scorer
         "startCount", startCount,
         "endCount", endCount,
         "level", level,
-        "path", pLength,
+        "length", pLength,
         "start", pStart,
         "end", pEnd);
     return score;

@@ -23,6 +23,14 @@ import de.nigjo.maze.score.api.ScoreInfo;
 import de.nigjo.maze.score.api.Scorer;
 
 /**
+ * A pseudo scorer which will suggest a "height" information to each cell of the maze.
+ * The overall score of each maze is always 0. The "height" is defined by a letter
+ * beginning with "A". "B" will be one height information above or below the height of "A".
+ * Its up to user to decide if the maze will "raise" or "go down". Upper case letters
+ * do show the optimal path, lower case letters are used for "side ways".
+ *
+ * The default maximum height is 10. This can be changed by the system property
+ * "de.nigjo.maze.score.height".
  *
  * @author nigjo
  */

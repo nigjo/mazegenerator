@@ -59,7 +59,7 @@ public class QuadraticMazePainter
     int width = maze.getWidth();
     for(int c = 0; c < width; c++)
     {
-      b.append(cells.get(c) == maze.getEntance() ? "─S─" : "───");
+      b.append(cells.get(c) == maze.getEntrance() ? "─S─" : "───");
       b.append(c + 1 < width ? '┬' : '┐');
     }
     int height = maze.getHeight();

@@ -51,6 +51,15 @@ public abstract class Maze
     this.entance = entance;
   }
 
+  public Cell getEntrance()
+  {
+    return getEntance();
+  }
+
+  /**
+   * @deprecated use {@link #getEntrance()}
+   */
+  @Deprecated
   public Cell getEntance()
   {
     return entance;
